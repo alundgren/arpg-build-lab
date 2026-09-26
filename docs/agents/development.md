@@ -30,6 +30,46 @@ Keep application code in Python until a concrete problem justifies another
 language. External tools and libraries may use other runtimes. Document any
 runtime needed by an integration when it is introduced.
 
+## Testing and validation
+
+Prefer tests in this order:
+
+```text
+End-to-end tests
+  |  Exercise a user journey through the actual application entry point.
+  v
+Integration or component tests
+  |  Check collaborating parts and focused failure cases.
+  v
+Pure unit tests
+     Check isolated logic when that is the useful place to verify it.
+```
+
+Start with the complete outcome a user needs. Add smaller tests where they
+provide useful evidence or diagnose important failures. This preference does
+not require duplicating every assertion at every level.
+
+Derive expected results from requirements and domain facts. Test desired,
+observable behavior. Avoid assertions that merely preserve today's output,
+private helper calls, incidental ordering, or implementation details. Exact
+values and regression tests are useful when they protect an intended contract.
+For example, a missing affix roll must remain unknown rather than becoming
+zero; that matters more than which helper parsed it.
+
+Use real collaborating components where practical. Isolate external services
+when needed for repeatable checks. An end-to-end importer test can run the
+installed command against a saved or synthetic response and verify that the
+saved build reloads without losing required information. Tests must respect
+the LETools direct-request policy; default checks make no live requests.
+
+Judge validation by what it establishes about correctness, performance,
+usability, reliability, and the task's other requirements. Coverage percentages
+and test counts are not goals. Choose evidence for the actual risks, such as a
+benchmark for a performance claim or an observed user journey for usability.
+Record what ran, its result, and what it cannot establish in the PR's Evidence
+section. Do not add application tests for prose or template-only edits; inspect
+the changed text, links, and formatting instead.
+
 ## Platform agreement
 
 Development and small CPU checks must work on a Linux VM and an Apple Silicon

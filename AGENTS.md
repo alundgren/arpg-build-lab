@@ -26,9 +26,10 @@ explain, reconsider the code organization before adding more instructions.
 
 - Changing module boundaries or persisted data: read
   `docs/agents/architecture.md`.
-- Setting up tools, portability, or artifact storage: read
+- Setting up tools, portability, artifact storage, or testing and validation: read
   `docs/agents/development.md`.
-- Creating, refining, selecting, or claiming GitHub work: read
+- Creating, refining, selecting, or claiming GitHub work, writing commits, or
+  preparing and reviewing PRs: read
   `docs/agents/workflow.md`. Use the `github-use` skill when available and the
   `gh` CLI for GitHub operations.
 - Continuing the project or choosing its next task: read
@@ -51,6 +52,10 @@ bulk-download builds or game data. Cache requested builds locally. Generate ML
 training examples through local mutations and evaluation of saved builds.
 
 ## Project principles
+
+Prefer ASCII diagrams over prose when explaining algorithms, processes, and
+data flow. Add short prose for context and details the diagram cannot show.
+Apply this to documentation, PR evidence, and explanations during work.
 
 Own a small, versioned canonical model. Keep external formats in adapters.
 Retain the game version and relevant provenance in every persisted build,
