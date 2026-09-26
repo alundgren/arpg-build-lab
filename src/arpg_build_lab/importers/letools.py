@@ -115,6 +115,91 @@ def _evidence(value: dict[str, Any], key: str, path: str) -> str | None:
     return field
 
 
+def verify_saved_versions(snapshot: BuildSnapshot, raw: bytes) -> None:
+    """Check retained LETools version fields against the saved snapshot."""
+    try:
+        payload = json.loads(raw, parse_constant=_json_constant)
+    except (ValueError, UnicodeDecodeError) as exc:
+        raise ValueError("Saved LETools response is not valid JSON") from exc
+    top = _record(payload, "response")
+    data = _record(top.get("data"), "data")
+    evidence = {
+        "created_for_build": _evidence(top, "created_for_build", "created_for_build"),
+        "data_version": _evidence(top, "data_version", "data_version"),
+        "data.dataVersion": _evidence(data, "dataVersion", "data.dataVersion"),
+    }
+    if snapshot.version_evidence != evidence:
+        raise ValueError(
+            "Snapshot version_evidence does not match saved LETools response"
+        )
+    parsed = [_version(value) for value in evidence.values()]
+    version = (
+        parsed[0]
+        if all(value is not None and value == parsed[0] for value in parsed)
+        else None
+    )
+    if snapshot.game_version != version:
+        raise ValueError("Snapshot game_version does not match saved LETools response")
+
+
+def validate_evaluation_source(raw: bytes, snapshot: BuildSnapshot) -> None:
+    """Reject raw LETools content outside the supported calculator input."""
+
+    def limited_fields(value: dict[str, Any], expected: set[str], path: str) -> None:
+        extra = sorted(set(value) - expected)
+        missing = sorted(expected - set(value))
+        limit = ", ".join(sorted(expected))
+        if extra:
+            raise ValueError(
+                f"Raw {path}.{extra[0]} is unsupported; supported fields: {limit}"
+            )
+        if missing:
+            raise ValueError(
+                f"Raw {path}.{missing[0]} is missing; required fields: {limit}"
+            )
+
+    payload = _record(json.loads(raw, parse_constant=_json_constant), "response")
+    limited_fields(payload, {"created_for_build", "data_version", "data"}, "response")
+    data = _record(payload["data"], "data")
+    supported_fields = {
+        "dataVersion",
+        "bio",
+        "charTree",
+        "skillTrees",
+        "equipment",
+        "idols",
+        "blessings",
+    }
+    limited_fields(data, supported_fields, "data")
+    bio = _record(data["bio"], "data.bio")
+    for key in ("characterClass", "chosenMastery", "level"):
+        if (
+            type(bio.get(key)) is not int
+            or type(snapshot.character["source_fields"].get(key)) is not int
+        ):
+            raise ValueError(
+                f"Raw data.bio.{key} and snapshot character.source_fields.{key} must be integers"
+            )
+    if bio != snapshot.character["source_fields"]:
+        raise ValueError("Raw data.bio differs from snapshot character")
+    tree = _record(data["charTree"], "data.charTree")
+    limited_fields(tree, {"treeID", "selected", "version"}, "data.charTree")
+    if (
+        tree["treeID"] != snapshot.passives["source_tree_id"]
+        or tree["version"] != snapshot.passives["source_version"]
+        or not isinstance(tree["selected"], dict)
+    ):
+        raise ValueError("Raw data.charTree has unsupported fields or identity")
+    for key, empty in (
+        ("skillTrees", []),
+        ("equipment", {}),
+        ("idols", []),
+        ("blessings", {}),
+    ):
+        if data[key] != empty:
+            raise ValueError(f"Raw data.{key} must be empty for supported evaluation")
+
+
 def parse_build(raw: bytes, source_url: str) -> BuildSnapshot:
     identifier = planner_id(source_url)
     try:
