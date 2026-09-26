@@ -90,7 +90,7 @@ def _evidence(value: dict[str, Any], key: str, path: str) -> str | None:
     return field
 
 
-def normalize(raw: bytes, source_url: str) -> BuildSnapshot:
+def parse_build(raw: bytes, source_url: str) -> BuildSnapshot:
     identifier = planner_id(source_url)
     try:
         payload = json.loads(raw, parse_constant=_json_constant)

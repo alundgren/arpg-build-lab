@@ -9,7 +9,7 @@ from urllib.error import HTTPError, URLError
 
 from arpg_build_lab.importers.cli import load, save
 from arpg_build_lab.domain.snapshot import BuildSnapshot
-from arpg_build_lab.importers.letools import ImportError, fetch, normalize, planner_id
+from arpg_build_lab.importers.letools import ImportError, fetch, parse_build, planner_id
 
 URL = "https://www.lastepochtools.com/planner/ABC12345"
 
@@ -36,9 +36,9 @@ def raw(value):
 
 
 class ImportTests(unittest.TestCase):
-    def test_normalize_and_round_trip(self):
+    def test_parse_build_and_round_trip(self):
         payload = raw(response())
-        snapshot = normalize(payload, URL)
+        snapshot = parse_build(payload, URL)
         self.assertEqual(snapshot.game_version, "1.5.0")
         self.assertEqual(snapshot.passives["selected"], {"4": 0, "5": 2})
         self.assertEqual(snapshot.skills[0]["level"], 5)
@@ -65,21 +65,21 @@ class ImportTests(unittest.TestCase):
         value = response()
         del value["created_for_build"]
         with tempfile.TemporaryDirectory() as temp:
-            snapshot = normalize(raw(value), URL)
+            snapshot = parse_build(raw(value), URL)
             self.assertIsNone(snapshot.game_version)
             self.assertIn("/unknown/imports/", str(save(raw(value), snapshot, Path(temp))))
         value["created_for_build"] = "Version 1.4.0"
-        self.assertIsNone(normalize(raw(value), URL).game_version)
+        self.assertIsNone(parse_build(raw(value), URL).game_version)
         value["created_for_build"] = 150
         with self.assertRaisesRegex(ImportError, "created_for_build"):
-            normalize(raw(value), URL)
+            parse_build(raw(value), URL)
 
     def test_known_translations_and_missing_roll(self):
         value = response()
         value["data"]["equipment"]["head"]["id"] = "UAzCMNI"
         value["data"]["equipment"]["head"]["affixes"][1]["r"] = 0
         value["data"]["blessings"]["1"]["id"] = "IIwBgzALMwSdA"
-        snapshot = normalize(raw(value), URL)
+        snapshot = parse_build(raw(value), URL)
         self.assertEqual(snapshot.equipment["head"]["translation"]["base_type_id"], 0)
         self.assertEqual(snapshot.equipment["head"]["translation"]["sub_type_id"], 1)
         self.assertEqual(snapshot.equipment["head"]["translation"]["unique_id"], 1)
@@ -105,10 +105,10 @@ class ImportTests(unittest.TestCase):
                 value = response()
                 mutate(value)
                 with self.assertRaisesRegex(ImportError, path):
-                    normalize(raw(value), URL)
+                    parse_build(raw(value), URL)
         with self.assertRaisesRegex(ImportError, "valid JSON"):
-            normalize(raw(response()).replace(b'"level": 42', b'"level": NaN'), URL)
-        snapshot = normalize(raw(response()), URL)
+            parse_build(raw(response()).replace(b'"level": 42', b'"level": NaN'), URL)
+        snapshot = parse_build(raw(response()), URL)
         persisted = snapshot.to_dict()
         bad = copy.deepcopy(persisted)
         bad["skills"][0]["selected"]["1"] = "many"
@@ -132,7 +132,7 @@ class ImportTests(unittest.TestCase):
             BuildSnapshot.from_dict(bad)
 
     def test_snapshot_version_evidence_is_independent_of_source_field_names(self):
-        persisted = normalize(raw(response()), URL).to_dict()
+        persisted = parse_build(raw(response()), URL).to_dict()
         persisted["version_evidence"] = {"recorded_game_version": "1.5.0"}
         snapshot = BuildSnapshot.from_dict(persisted)
         self.assertEqual(snapshot.to_dict()["version_evidence"], {"recorded_game_version": "1.5.0"})
@@ -143,13 +143,13 @@ class ImportTests(unittest.TestCase):
             with self.subTest(url=url), self.assertRaises(ImportError):
                 planner_id(url)
         with self.assertRaisesRegex(ImportError, "valid JSON"):
-            normalize(b"{", URL)
+            parse_build(b"{", URL)
         with self.assertRaisesRegex(ImportError, "data"):
-            normalize(raw({"data": []}), URL)
+            parse_build(raw({"data": []}), URL)
         value = response()
         value["data"]["skillTrees"][0]["selected"]["1"] = "many"
         with self.assertRaisesRegex(ImportError, "integer allocation"):
-            normalize(raw(value), URL)
+            parse_build(raw(value), URL)
 
     def test_fetch_errors_and_single_endpoint(self):
         error = HTTPError("", 403, "Forbidden", {}, None)

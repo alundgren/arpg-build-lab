@@ -10,7 +10,7 @@ from pathlib import Path
 from uuid import uuid4
 
 from arpg_build_lab.domain.snapshot import BuildSnapshot
-from arpg_build_lab.importers.letools import ImportError, fetch, normalize
+from arpg_build_lab.importers.letools import ImportError, fetch, parse_build
 
 
 def _invalid_constant(value: str) -> None:
@@ -81,7 +81,7 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         raw = args.raw_file.read_bytes() if args.raw_file else fetch(args.url)
-        snapshot = normalize(raw, args.url)
+        snapshot = parse_build(raw, args.url)
         location = save(raw, snapshot, args.output_root, input_path=args.raw_file)
     except (ImportError, OSError, ValueError) as exc:
         print(f"Import failed: {exc}", file=sys.stderr)

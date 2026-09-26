@@ -4,7 +4,7 @@ The command accepts exactly one `https://www.lastepochtools.com/planner/<id>`
 URL. For a direct import it requests only `/api/public/build_data/<id>`, with a
 20-second timeout, a browser-compatible User-Agent, and redirects disabled.
 The optional `--raw-file` reads a saved response and makes no HTTP request.
-Both paths call `normalize()` and save a new run; they never overwrite an old
+Both paths call `parse_build()` and save a new run; they never overwrite an old
 one.
 
 The snapshot includes class, mastery, level, passive selections, skill trees,

@@ -17,5 +17,5 @@ snapshot has source IDs and unresolved translations, so calculator work must
 check compatibility before treating it as an evaluation input.
 
 Use synthetic or permission-checked fixtures for automated checks. Live network
-access must not be required for the default tests. Leave evaluator integration,
-data generation, ML, search, and UI in the epic for later work.
+access must not be required for the default tests. Leave build evaluator
+integration, data generation, ML, search, and UI in the epic for later work.

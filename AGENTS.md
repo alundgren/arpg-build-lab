@@ -14,7 +14,7 @@ instruction or documentation collection.
 
 - `src/arpg_build_lab/domain/` owns our canonical build representation and validity rules.
 - `src/arpg_build_lab/importers/` translates external builds into that representation.
-- `src/arpg_build_lab/evaluators/` will adapt calculators and normalize their results.
+- `src/arpg_build_lab/evaluators/` will run calculators and record build evaluation results.
 - `ml/` owns feature preparation, training, and measured experiments.
 
 Add a local `AGENTS.md` when a directory has distinct responsibilities or rules.
@@ -67,19 +67,22 @@ words. Name code after the Last Epoch concepts it models or the work it does.
 New architectural layers need a concrete project problem; do not introduce
 them or their terminology merely to follow a named pattern.
 
-Own a small, versioned build model. Importers own external build formats;
-evaluators own calculator integration and normalized results.
+Use established ML terms for ML concepts. Qualify overlapping software terms
+rather than redefining them; follow the ML vocabulary in the architecture guide.
+
+Own a small, versioned build representation, `BuildSnapshot`. Importers own
+external build formats; build evaluators own calculator integration and results.
 Retain the game version and relevant provenance in every persisted build,
 evaluation, and dataset. Represent missing information honestly.
 
 Make ML behavior measurable. Compare useful baselines, inspect failures, and
-explain unfamiliar concepts using actual project examples. Evaluator outputs
+explain unfamiliar concepts using actual project examples. Build evaluator outputs
 are reference results that can be wrong.
 
 Write all application code we own in Python. Introduce another language only
 when a concrete problem in our application justifies it. External tools and
 libraries may use any language or runtime. Keep code specific to a build source
-or calculator in the corresponding importer or evaluator.
+or calculator in the corresponding importer or build evaluator.
 
 Keep development and small CPU checks portable across Linux and macOS. Larger
 training may use the Mac GPU. Keep versioned files for reproducible artifacts;

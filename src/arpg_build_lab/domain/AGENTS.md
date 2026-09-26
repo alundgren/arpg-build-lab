@@ -1,6 +1,6 @@
 # Canonical Last Epoch data
 
-Own the versioned `BuildSnapshot`, build validity rules, and normalized
+Own the versioned `BuildSnapshot`, build validity rules, and
 `BuildEvaluation` contract as they are implemented. Read
 `../../../docs/agents/architecture.md` before defining persisted formats.
 

@@ -20,8 +20,8 @@ item, affix, and blessing IDs in `unresolved`. Translated items and blessings
 expose `base_type_id`, `sub_type_id`, and `unique_id`; lookup-only metadata
 stays in `lookup_extra`. Item `source_fields` retain source-specific properties,
 including optional rolls and item metadata. `unsupported_sections` lists data
-sections that the importer has not normalized. The full original response is
-always available at the relative `raw_path`, guarded by `raw_sha256`.
+sections that the importer has not represented in the snapshot. The full original
+response is always available at the relative `raw_path`, guarded by `raw_sha256`.
 
 `BuildSnapshot.from_dict` accepts only schema 1 and validates nested record types.
 `load()` also verifies the colocated raw response hash. A future schema change

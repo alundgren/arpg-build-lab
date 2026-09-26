@@ -92,7 +92,7 @@ Use an explicit `unknown` bucket while investigating an import whose game
 version is unavailable; do not treat it as version-qualified training data.
 
 Record enough metadata to reproduce a dataset or experiment: game/schema
-versions, source build identity and provenance, generator and evaluator
+versions, source build identity and provenance, generator and build evaluator
 versions, seed, feature definition, split, configuration, relevant dependency
 versions, device, and code revision. Add content hashes where they are needed
 to identify exact inputs. A declared seed alone does not prove reproducibility.
@@ -106,7 +106,7 @@ Check the license before copying upstream code or substantial data. MIT covers
 our repository work; it does not relicense Last Epoch assets or third-party
 material. Record source, permission/license, and any required attribution for
 redistributed examples. Prefer permissive dependencies and keep calculator
-integration in the evaluator that uses it.
+integration in the build evaluator that uses it.
 
 ## Documentation and search
 

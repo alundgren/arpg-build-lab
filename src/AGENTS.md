@@ -3,8 +3,9 @@
 The `arpg_build_lab/` package contains the application and its ownership areas.
 
 Keep dependencies directed toward `arpg_build_lab/domain/`. Domain code does not
-import importers, evaluators, ML code, or commands. Importers and evaluators
-exchange domain types and keep source- or calculator-specific details local.
+import importers, build evaluators, ML code, or commands. Importers and build
+evaluators exchange domain types and keep source- or calculator-specific
+details local.
 Use the component names and operation names in
 `../docs/agents/architecture.md` for paths, public functions, and documentation.
 

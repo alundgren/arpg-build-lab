@@ -10,7 +10,7 @@ Hypothesis:
 - Code revision and command/configuration:
 - Game and schema versions:
 - Dataset identity, provenance, and size:
-- Source builds, generator/evaluator versions, and seed:
+- Source builds, generator and build evaluator versions, and seed:
 - Feature representation and prediction target, including units:
 - Train/validation/test split and related-build grouping:
 - Model/baseline, parameter count, and relevant hyperparameters:
@@ -21,7 +21,7 @@ Hypothesis:
 Record only measurements we actually made. Mark unavailable measurements as
 unavailable. Include training and validation error, useful per-output or
 per-group results, inference speed where relevant, and the worst predictions.
-Keep untouched evaluation data separate from model selection.
+Keep the test set untouched until model selection is complete.
 
 ## What worked and what did not
 
