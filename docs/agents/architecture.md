@@ -37,7 +37,7 @@ LETools import path.
 | `src/domain/` | Canonical build, validity rules, normalized evaluation | No adapter or ML dependencies |
 | `src/importers/` | Recognize and normalize external builds | Domain |
 | `src/evaluators/` | Run calculators and normalize results | Domain and chosen calculator integration |
-| `ml/` | Prepare features, train models, measure errors | Versioned exported files |
+| `ml/` | Prepare features, train models, measure errors | Domain and versioned datasets |
 
 A future command or UI coordinates these components. Add generation, mutation,
 and search components when the corresponding work begins. Modules expose the
@@ -60,12 +60,24 @@ units and missing-value meaning defined. Retain raw results outside Git for
 investigation. External calculators provide reference labels and can disagree.
 They do not define our canonical model.
 
-## TypeScript and Python
+## Application language and integration
 
-The intended split is TypeScript for the domain, importers, build manipulation,
-and orchestration; Python for ML where useful. Begin with versioned files
-between them. Agree on and validate each exchange format when its first
-consumer exists. There is no service protocol to implement now.
+Write all application code we own in Python, including domain rules, importers,
+evaluation adapters, build manipulation, search, ML, orchestration, and any
+future UI. Introduce another language only when a concrete problem in our
+application justifies it. Record the problem and the reason for that choice
+when it arises.
+
+External tools and libraries may use any language or runtime, such as a Lua
+calculator. Keep external tool integrations behind adapters and choose the
+simplest supported integration that meets our needs.
+
+Reuse canonical domain types and validity rules across Python modules. Keep ML
+dependencies out of the domain and importer code. Use versioned files for build
+snapshots, datasets, and reproducible experiment artifacts; file exchange is
+not required between Python modules. Agree on and validate each persisted or
+external exchange format when its first consumer exists. Add processes or
+services only for a demonstrated need.
 
 ## Learning and reuse
 

@@ -19,7 +19,7 @@ name in the epic is illustrative until tooling exists.
 Start in `src/importers/` to verify the actual endpoint, payload, and usage
 expectations. Define the minimum evidence-backed representation in
 `src/domain/`, including how missing version information is handled. Introduce
-the TypeScript tooling and meaningful Linux/macOS checks with this work.
+the Python tooling and meaningful Linux/macOS checks with this work.
 
 Use synthetic or permission-checked fixtures for automated checks. Live network
 access must not be required for the default tests. Leave evaluator integration,

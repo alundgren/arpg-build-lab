@@ -7,10 +7,14 @@ runtime dependencies, package manifests, executable commands, tests, or CI yet.
 Introduce those with the first runnable importer. Do not add placeholder code
 just to give a check something to run.
 
-The preferred TypeScript stack is Node, pnpm, and Vite+ where useful. Select and
-pin supported versions when introducing it, including a lockfile. Python and
-its dependency manager arrive with the first ML work, without adding Python to
-the TypeScript development path.
+Introduce Python tooling with the first runnable importer. Select the supported
+Python version and dependency manager then, and pin dependencies with a
+lockfile. Add ML dependencies with the first experiment; ordinary domain and
+importer development must not require them.
+
+Keep application code in Python until a concrete problem justifies another
+language. External tools and libraries may use other runtimes. Document any
+runtime needed by an integration when it is introduced.
 
 ## Platform agreement
 
