@@ -11,6 +11,16 @@ import run -> importers.cli.load -> BuildSnapshot
 ```
 
 Install the optional Lupa 2.8 runtime with `uv sync --locked --extra calculator`.
+On Apple Silicon macOS, the Lupa wheel omits LuaJIT. Install Homebrew's
+`luajit` and `pkg-config`, then build the locked Lupa source package against
+that runtime:
+
+```bash
+brew install luajit pkg-config
+uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa
+```
+
+The worker checks that the loaded runtime is LuaJIT 2.1 before loading LEB.
 Clone `https://github.com/uta666XYZ/LastEpochBuilding.git` separately and
 checkout commit `a97d388aca0da00907afb9d5a945c8f254a67b18`. The checkout
 must contain `src/` and `runtime/` and have no source changes. The evaluator

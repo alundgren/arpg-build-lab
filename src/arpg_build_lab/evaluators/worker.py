@@ -4,6 +4,7 @@ import json
 import math
 import platform
 import sys
+from importlib import import_module
 from importlib.metadata import version
 from pathlib import Path
 
@@ -25,9 +26,17 @@ def metrics_from_output(output: dict) -> dict[str, dict]:
 
 def main() -> int:
     try:
-        from lupa.luajit21 import LuaRuntime
+        try:
+            lua_runtime = import_module("lupa.luajit21").LuaRuntime
+        except ModuleNotFoundError as exc:
+            if exc.name != "lupa.luajit21":
+                raise
+            lua_runtime = import_module("lupa.lua").LuaRuntime
 
-        lua = LuaRuntime(unpack_returned_tuples=True)
+        lua = lua_runtime(unpack_returned_tuples=True)
+        jit_version = lua.eval("jit and jit.version or nil")
+        if not isinstance(jit_version, str) or not jit_version.startswith("LuaJIT 2.1"):
+            raise ValueError("Lupa must use LuaJIT 2.1 for this calculator")
         globals_ = lua.globals()
         globals_.arg = lua.table()
         globals_.package.path = (
@@ -67,7 +76,7 @@ def main() -> int:
                 "Armour": build.calcsTab.mainOutput.Armour,
             },
             "runtime": "Lupa LuaJIT 2.1",
-            "runtime_version": lua.eval("jit.version")
+            "runtime_version": jit_version
             + " / Lupa "
             + version("lupa")
             + " / Python "

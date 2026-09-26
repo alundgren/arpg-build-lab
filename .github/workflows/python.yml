@@ -22,7 +22,14 @@ jobs:
           git clone --filter=blob:none --sparse https://github.com/uta666XYZ/LastEpochBuilding.git "$RUNNER_TEMP/last-epoch-building"
           git -C "$RUNNER_TEMP/last-epoch-building" checkout a97d388aca0da00907afb9d5a945c8f254a67b18
           git -C "$RUNNER_TEMP/last-epoch-building" sparse-checkout set src runtime
+      - name: Install macOS LuaJIT build dependencies
+        if: runner.os == 'macOS'
+        run: brew install luajit pkg-config
       - name: Real calculator examples
         run: |
-          uv sync --locked --extra calculator
-          uv run --locked --extra calculator python scripts/check_real_engine.py --leb-checkout "$RUNNER_TEMP/last-epoch-building"
+          if [[ "$RUNNER_OS" == "macOS" ]]; then
+            uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa
+          else
+            uv sync --locked --extra calculator
+          fi
+          uv run --no-sync python scripts/check_real_engine.py --leb-checkout "$RUNNER_TEMP/last-epoch-building"
