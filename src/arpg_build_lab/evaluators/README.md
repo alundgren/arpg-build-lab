@@ -17,7 +17,7 @@ that runtime:
 
 ```bash
 brew install luajit pkg-config
-uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa
+LUPA_NO_BUNDLE=true uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa
 ```
 
 The worker checks that the loaded runtime is LuaJIT 2.1 before loading LEB.

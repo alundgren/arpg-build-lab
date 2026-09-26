@@ -28,7 +28,7 @@ jobs:
       - name: Real calculator examples
         run: |
           if [[ "$RUNNER_OS" == "macOS" ]]; then
-            uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa
+            LUPA_NO_BUNDLE=true uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa
           else
             uv sync --locked --extra calculator
           fi

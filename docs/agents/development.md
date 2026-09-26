@@ -77,7 +77,7 @@ with `uv sync --locked --extra calculator`. Supply a local checkout of Last Epoc
 Building at revision `a97d388aca0da00907afb9d5a945c8f254a67b18` to
 `arpg-evaluate artifacts/1.4.7/imports/<run-id> --leb-checkout <checkout>`.
 On Apple Silicon macOS, install Homebrew `luajit` and `pkg-config`, then run
-`uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa`
+`LUPA_NO_BUNDLE=true uv sync --locked --extra calculator --no-binary-package lupa --reinstall-package lupa`
 to build Lupa against LuaJIT 2.1; the prebuilt ARM64 wheel omits LuaJIT.
 See `src/arpg_build_lab/evaluators/README.md` for supported input and synthetic
 examples. `python3 scripts/check.py` remains offline. The explicit engine check
