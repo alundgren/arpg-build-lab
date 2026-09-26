@@ -1,5 +1,6 @@
 import copy
 import json
+import os
 import subprocess
 import tempfile
 import unittest
@@ -13,7 +14,12 @@ from arpg_build_lab.domain.evaluation import (
     sha256,
 )
 from arpg_build_lab.domain.snapshot import BuildSnapshot
-from arpg_build_lab.evaluators.le_building import calculator_xml, supported
+from arpg_build_lab.evaluators.le_building import (
+    CONFIG_DEFAULTS,
+    calculator_xml,
+    evaluate,
+    supported,
+)
 from arpg_build_lab.evaluators.worker import metrics_from_output
 from arpg_build_lab.importers.cli import load as load_import
 from arpg_build_lab.importers.cli import save
@@ -29,6 +35,53 @@ def saved(root: Path) -> Path:
 
 
 class EvaluationTests(unittest.TestCase):
+    def test_evaluation_public_default_uses_shared_artifact_root(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            snapshot = load_import(saved(root))
+            output = {
+                "loaded": {
+                    "class_id": 2,
+                    "class_name": "Sentinel",
+                    "mastery_id": 0,
+                    "level": 10,
+                    "target_version": "1_4",
+                    "tree_version": "1_4",
+                    "auto_level": False,
+                    "nodes": {"Sentinel": 1},
+                    "skills": 0,
+                    "items": 0,
+                    "equipped": {},
+                    "combat_inputs": CONFIG_DEFAULTS,
+                },
+                "rounding": True,
+                "runtime": "LuaJIT 2.1",
+                "runtime_version": "2.1",
+                "metrics": {"Life": 206, "Armour": 0},
+            }
+
+            def worker(command, **_kwargs):
+                Path(command[-1]).write_text(json.dumps(output))
+                return subprocess.CompletedProcess(command, 0, "", "")
+
+            shared = root / "shared"
+            with (
+                patch.dict(os.environ, {"ARPG_BUILD_LAB_ARTIFACTS_ROOT": str(shared)}),
+                patch("arpg_build_lab.evaluators.le_building.verify_checkout"),
+                patch("arpg_build_lab.evaluators.le_building.shutil.copytree"),
+                patch(
+                    "arpg_build_lab.evaluators.le_building.subprocess.run",
+                    side_effect=worker,
+                ),
+            ):
+                location = evaluate(snapshot, root / "checkout")
+                explicit = evaluate(snapshot, root / "checkout", root / "explicit")
+            self.assertTrue(location.is_relative_to(shared / "1.4.7/evaluations"))
+            self.assertTrue(
+                explicit.is_relative_to(root / "explicit/1.4.7/evaluations")
+            )
+            self.assertEqual(load(location).metrics["armour"]["value"], 0)
+
     def test_saved_version_evidence_and_provenance(self):
         with tempfile.TemporaryDirectory() as temporary:
             location = saved(Path(temporary))

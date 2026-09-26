@@ -21,7 +21,11 @@ def main(argv: list[str] | None = None) -> int:
         required=True,
         help="Local pinned Last Epoch Building checkout",
     )
-    parser.add_argument("--output-root", type=Path, default=Path("artifacts"))
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        help="Artifact root (overrides ARPG_BUILD_LAB_ARTIFACTS_ROOT)",
+    )
     parser.add_argument("--timeout", type=float, default=60)
     args = parser.parse_args(argv)
     try:

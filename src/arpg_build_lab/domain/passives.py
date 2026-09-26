@@ -1,4 +1,4 @@
-"""Supported Sentinel passive allocations for the current calculator subset."""
+"""Supported Sentinel passive point allocations for the current calculator subset."""
 
 
 def validate(selected: dict[str, int], level: int) -> dict[str, int]:
@@ -23,7 +23,7 @@ def validate(selected: dict[str, int], level: int) -> dict[str, int]:
 
 
 def allocations(level: int) -> list[dict[str, int]]:
-    """Order valid allocations by Fearless points, then Armour Clad points."""
+    """Order valid passive point allocations by Fearless points, then Armour Clad points."""
     result = []
     for fearless in range(9):
         for armour_clad in range(6):

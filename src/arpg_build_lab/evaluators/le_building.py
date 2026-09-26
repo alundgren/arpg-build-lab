@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from arpg_build_lab.artifacts import resolve_artifact_root
 from arpg_build_lab.domain.evaluation import (
     BuildEvaluation,
     canonical_bytes,
@@ -152,9 +153,10 @@ def verify_checkout(checkout: Path) -> None:
 def evaluate(
     snapshot: BuildSnapshot,
     checkout: Path,
-    root: Path = Path("artifacts"),
+    root: Path | None = None,
     timeout: float = 60,
 ) -> Path:
+    output_root = resolve_artifact_root(root)
     selected = supported(snapshot)
     verify_checkout(checkout)
     xml = calculator_xml(snapshot.character["level"], selected)
@@ -216,7 +218,7 @@ def evaluate(
 
     metrics = metrics_from_output(output)
     location = (
-        root
+        output_root
         / "1.4.7"
         / "evaluations"
         / f"leb-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid4().hex[:8]}"

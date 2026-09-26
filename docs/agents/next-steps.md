@@ -20,5 +20,5 @@ compatibility checks before evaluation.
 
 Use synthetic or permission-checked fixtures for automated checks. Live network
 access is not required for the default tests. The current generator exhausts
-only Fearless and Armour Clad allocations for one supported saved starting snapshot. ML,
+only Fearless and Armour Clad passive point allocations for one supported saved starting snapshot. ML,
 search, and UI remain future work.

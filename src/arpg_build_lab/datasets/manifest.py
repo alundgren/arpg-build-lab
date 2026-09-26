@@ -6,7 +6,10 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-from arpg_build_lab.datasets.passive_space import GENERATOR_VERSION, candidates
+from arpg_build_lab.datasets.passive_point_allocations import (
+    GENERATOR_VERSION,
+    candidates,
+)
 from arpg_build_lab.domain.evaluation import canonical_bytes, sha256
 from arpg_build_lab.domain.evaluation import load as load_evaluation
 from arpg_build_lab.domain.snapshot import BuildSnapshot
@@ -188,7 +191,7 @@ def load(location: Path) -> Dataset:
             or evaluation.snapshot_sha256 != expected_hash
         ):
             raise ValueError(
-                f"Candidate {index} snapshot differs from promised allocation"
+                f"Candidate {index} snapshot differs from promised passive point allocation"
             )
         if (
             evaluation.source_url,

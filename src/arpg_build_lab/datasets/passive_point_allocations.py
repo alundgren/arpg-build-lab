@@ -1,4 +1,4 @@
-"""Enumerate canonical passive mutations of one saved build."""
+"""Enumerate canonical passive point allocations from one starting snapshot."""
 
 from arpg_build_lab.domain.passives import allocations
 from arpg_build_lab.domain.snapshot import BuildSnapshot

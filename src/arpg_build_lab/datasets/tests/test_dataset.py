@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import tempfile
 import unittest
@@ -7,7 +8,7 @@ from unittest.mock import patch
 
 from arpg_build_lab.datasets.cli import generate
 from arpg_build_lab.datasets.manifest import load, snapshot_hash
-from arpg_build_lab.datasets.passive_space import candidates
+from arpg_build_lab.datasets.passive_point_allocations import candidates
 from arpg_build_lab.domain.evaluation import BuildEvaluation, canonical_bytes, sha256
 from arpg_build_lab.domain.snapshot import BuildSnapshot
 from arpg_build_lab.importers.cli import load as load_import
@@ -76,6 +77,32 @@ def fake_evaluate(
 
 
 class DatasetTests(unittest.TestCase):
+    def test_shared_artifact_root_contains_complete_evaluations(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            import_run = saved(root)
+            shared = root / "shared"
+            with (
+                patch.dict(os.environ, {"ARPG_BUILD_LAB_ARTIFACTS_ROOT": str(shared)}),
+                patch("arpg_build_lab.datasets.cli.verify_checkout"),
+                patch(
+                    "arpg_build_lab.datasets.cli.evaluate", side_effect=fake_evaluate
+                ) as evaluate,
+            ):
+                location = generate(import_run, root / "checkout")
+                self.assertTrue(location.is_relative_to(shared))
+                self.assertEqual(load(location).manifest["candidate_count"], 19)
+                self.assertTrue(
+                    all(
+                        call.args[2] == location / "_working"
+                        for call in evaluate.call_args_list
+                    )
+                )
+                explicit = generate(import_run, root / "checkout", root / "explicit")
+                self.assertTrue(explicit.is_relative_to(root / "explicit"))
+                self.assertEqual(load(explicit).manifest["candidate_count"], 19)
+            self.assertFalse((shared / "1.4.7/evaluations").exists())
+
     def test_boundaries_order_and_preserved_fields(self):
         with tempfile.TemporaryDirectory() as temporary:
             starting_snapshot = load_import(saved(Path(temporary)))

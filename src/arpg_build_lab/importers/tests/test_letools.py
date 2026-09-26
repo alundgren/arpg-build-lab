@@ -1,5 +1,8 @@
 import copy
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from io import BytesIO
@@ -57,6 +60,92 @@ def raw(value):
 
 
 class ImportTests(unittest.TestCase):
+    def test_shared_artifact_root_across_worktrees_and_explicit_override(self):
+        payload = raw(response())
+        snapshot = parse_build(payload, URL)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            shared = root / "shared"
+            first_worktree = root / "first-worktree"
+            second_worktree = root / "second-worktree"
+            first_worktree.mkdir()
+            second_worktree.mkdir()
+            raw_path = root / "response.json"
+            raw_path.write_bytes(payload)
+            command = Path(sys.executable).with_name("arpg-import")
+            for worktree in (first_worktree, second_worktree):
+                process = subprocess.run(
+                    [str(command), URL, "--raw-file", str(raw_path)],
+                    cwd=worktree,
+                    env={**os.environ, "ARPG_BUILD_LAB_ARTIFACTS_ROOT": str(shared)},
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                )
+                saved_path = Path(
+                    next(
+                        line.removeprefix("Saved import: ")
+                        for line in process.stdout.splitlines()
+                        if line.startswith("Saved import: ")
+                    )
+                )
+                self.assertTrue(saved_path.is_relative_to(shared))
+                self.assertEqual(load(saved_path), snapshot)
+            runs = list((shared / "1.5.0/imports").iterdir())
+            self.assertEqual(len(runs), 2)
+            self.assertTrue(all(load(run) == snapshot for run in runs))
+            subprocess.run(
+                [str(command), URL, "--raw-file", str(raw_path)],
+                cwd=first_worktree,
+                env={**os.environ, "ARPG_BUILD_LAB_ARTIFACTS_ROOT": "relative"},
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            self.assertEqual(
+                len(list((first_worktree / "relative/1.5.0/imports").iterdir())), 1
+            )
+            subprocess.run(
+                [str(command), URL, "--raw-file", str(raw_path)],
+                cwd=second_worktree,
+                env={**os.environ, "ARPG_BUILD_LAB_ARTIFACTS_ROOT": ""},
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            self.assertEqual(
+                len(list((second_worktree / "artifacts/1.5.0/imports").iterdir())),
+                1,
+            )
+            explicit = root / "explicit"
+            subprocess.run(
+                [
+                    str(command),
+                    URL,
+                    "--raw-file",
+                    str(raw_path),
+                    "--output-root",
+                    str(explicit),
+                ],
+                cwd=second_worktree,
+                env={**os.environ, "ARPG_BUILD_LAB_ARTIFACTS_ROOT": str(shared)},
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            self.assertEqual(len(list((explicit / "1.5.0/imports").iterdir())), 1)
+            with patch.dict(
+                os.environ, {"ARPG_BUILD_LAB_ARTIFACTS_ROOT": str(root / "one")}
+            ):
+                first = save(payload, snapshot)
+                os.environ["ARPG_BUILD_LAB_ARTIFACTS_ROOT"] = str(root / "two")
+                second = save(payload, snapshot)
+                third = save(payload, snapshot, root / "explicit-public")
+            self.assertTrue(first.is_relative_to(root / "one"))
+            self.assertTrue(second.is_relative_to(root / "two"))
+            self.assertTrue(third.is_relative_to(root / "explicit-public"))
+            self.assertEqual(load(second), snapshot)
+
     def test_parse_build_and_round_trip(self):
         payload = raw(response())
         snapshot = parse_build(payload, URL)

@@ -2,8 +2,8 @@
 
 The LETools importer produces a versioned `BuildSnapshot`. The Last Epoch
 Building evaluator calculates health and armour for a narrow 1.4.7 Sentinel
-subset. The dataset command evaluates every supported two-passive allocation
-for one saved starting snapshot. ML models remain future work.
+subset. The dataset command evaluates every supported two-node passive point
+allocation for one saved starting snapshot. ML models remain future work.
 
 ## Two goals
 
@@ -30,7 +30,7 @@ its name does not require a DDD layer structure.
 | LETools importer | Code that retrieves a requested LETools response and translates it into a build snapshot. | `importers/letools.py` |
 | Build evaluator | Code that runs a calculator for a supported build snapshot and records its reference results. | `evaluators/le_building.py` and [its limits](../../src/arpg_build_lab/evaluators/README.md) |
 | Build evaluation | A versioned record of the evaluated snapshot, calculator provenance, metrics, and retained-file hashes. | `BuildEvaluation` in `domain/evaluation.py` and its [format contract](../../src/arpg_build_lab/domain/README.md) |
-| Dataset | One starting snapshot and the ordered, complete set of its supported passive allocations with reference evaluations. | `datasets/` and its [manifest contract](../../src/arpg_build_lab/datasets/README.md) |
+| Dataset | One starting snapshot and the ordered, complete set of its supported passive point allocations with reference evaluations. | `datasets/` and its [manifest contract](../../src/arpg_build_lab/datasets/README.md) |
 
 Paths in this document are relative to `src/arpg_build_lab/` unless stated
 otherwise. Keep narrow terminology beside the owning module in its README or
@@ -154,22 +154,23 @@ importers/cli.py:load -> domain/snapshot.py:BuildSnapshot
 
 ## Current dataset flow
 
-`arpg-dataset` in `datasets/cli.py` validates an import run, enumerates
-allocations through `datasets/passive_space.py`, and asks the existing build
-evaluator to calculate each candidate. `datasets/manifest.py:load` checks the
-retained starting snapshot raw response and every candidate evaluation after generation or
-after moving the dataset run.
+`arpg-dataset` in `datasets/cli.py` validates an import run, enumerates passive
+point allocations through `datasets/passive_point_allocations.py`, and asks the
+existing build evaluator to calculate each candidate.
+`datasets/manifest.py:load` checks the retained starting snapshot raw response
+and every candidate evaluation after generation or after moving the dataset run.
 
 ```text
-importers/cli.py:load -> datasets/passive_space.py:candidates
-                              |           |
-                              |           v
-                              |   evaluators/le_building.py:evaluate
-                              |           |
-                              +-----------+-> datasets/manifest.py:load
-                                                |
-                                                v
-                                      complete dataset run
+importers/cli.py:load
+         |
+         v
+datasets/passive_point_allocations.py:candidates
+         |
+         v
+evaluators/le_building.py:evaluate
+         |
+         v
+datasets/manifest.py:load -> complete dataset run
 ```
 
 ## Future ML
@@ -206,6 +207,7 @@ the actual calls, dependencies, or data flow described by the diagram.
 | `src/arpg_build_lab/importers/` | Parse external builds into `BuildSnapshot` | Domain |
 | `src/arpg_build_lab/evaluators/` | Supported LEB conversion, execution, and metric extraction | Domain and optional Lupa runtime |
 | `src/arpg_build_lab/datasets/` | Generation from one starting snapshot, evaluation orchestration, and dataset persistence | Domain, importer, and build evaluator |
+| `src/arpg_build_lab/artifacts.py` | Resolve the artifact root for import, evaluation, and dataset writes | Python standard library |
 | `ml/` | Future feature preparation, training, and error measurement | Domain and versioned datasets |
 | `scripts/` | Development checks and their output | Python standard library and locked development tools |
 
@@ -214,6 +216,11 @@ The evaluation command in `cli.py` coordinates the importer loader and build
 evaluator without a dependency between their packages. The dataset command
 reuses both; the importer and evaluator do not depend on datasets. Search
 remains future work.
+
+Import, evaluation, and dataset writers resolve their output root through
+`artifacts.py`. They keep the same game-version and artifact-kind directories
+under the selected root. Loading an existing record uses its explicit path and
+retained version, source, and content checks regardless of where the root sits.
 
 ## Data that we own
 

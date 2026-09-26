@@ -8,8 +8,12 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from arpg_build_lab.artifacts import resolve_artifact_root
 from arpg_build_lab.datasets.manifest import CONFIGURATION, load, snapshot_hash
-from arpg_build_lab.datasets.passive_space import GENERATOR_VERSION, candidates
+from arpg_build_lab.datasets.passive_point_allocations import (
+    GENERATOR_VERSION,
+    candidates,
+)
 from arpg_build_lab.domain.evaluation import canonical_bytes, sha256
 from arpg_build_lab.domain.evaluation import load as load_evaluation
 from arpg_build_lab.evaluators.le_building import (
@@ -24,9 +28,10 @@ from arpg_build_lab.importers.letools import validate_evaluation_source
 def generate(
     import_run: Path,
     checkout: Path,
-    root: Path = Path("artifacts"),
+    root: Path | None = None,
     timeout: float = 60,
 ) -> Path:
+    output_root = resolve_artifact_root(root)
     if not 0 < timeout <= 600:
         raise ValueError("timeout must be greater than 0 and no more than 600 seconds")
     starting_snapshot = load_import(import_run)
@@ -37,7 +42,7 @@ def generate(
     verify_checkout(checkout)
     planned = candidates(starting_snapshot)
     run_id = f"sentinel-passives-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid4().hex[:8]}"
-    location = root / "1.4.7" / "datasets" / run_id
+    location = output_root / "1.4.7" / "datasets" / run_id
     location.mkdir(parents=True, exist_ok=False)
     starting_snapshot_dir = location / "starting_snapshot"
     starting_snapshot_dir.mkdir()
@@ -133,11 +138,15 @@ def generate(
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Generate calculator reference results for every supported passive allocation"
+        description="Generate calculator reference results for every supported passive point allocation"
     )
     parser.add_argument("import_run", type=Path, help="Existing import-run directory")
     parser.add_argument("--leb-checkout", type=Path, required=True)
-    parser.add_argument("--output-root", type=Path, default=Path("artifacts"))
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        help="Artifact root (overrides ARPG_BUILD_LAB_ARTIFACTS_ROOT)",
+    )
     parser.add_argument("--timeout", type=float, default=60)
     args = parser.parse_args(argv)
     try:

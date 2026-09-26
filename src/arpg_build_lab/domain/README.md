@@ -37,7 +37,7 @@ revision, application version and game-data selection, runtime, configuration,
 and health and armour with units. A measured zero is a number; a missing metric
 is invalid. `snapshot_sha256` hashes the entire snapshot as UTF-8 JSON with
 sorted keys, compact separators, no ASCII escaping and no nonfinite numbers.
-It changes when canonical passive allocations change even if the source raw
+It changes when canonical passive point allocations change even if the source raw
 hash stays the same. `files` hashes every retained input, original calculator
 output and diagnostic file. `domain.evaluation.load()` checks these links and
 the source identity. The domain contract does not depend on calculator APIs.

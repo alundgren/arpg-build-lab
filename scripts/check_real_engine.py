@@ -2,6 +2,7 @@
 
 import argparse
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -32,6 +33,7 @@ def main() -> None:
     args = parser.parse_args()
     with tempfile.TemporaryDirectory() as temporary:
         root = Path(temporary)
+        environment = {**os.environ, "ARPG_BUILD_LAB_ARTIFACTS_ROOT": str(root)}
 
         def command(run: Path) -> Path:
             process = subprocess.run(
@@ -42,9 +44,8 @@ def main() -> None:
                     str(run),
                     "--leb-checkout",
                     str(args.leb_checkout),
-                    "--output-root",
-                    str(root),
                 ],
+                env=environment,
                 capture_output=True,
                 text=True,
                 timeout=90,
@@ -122,9 +123,8 @@ def main() -> None:
                     str(starting_snapshot_run),
                     "--leb-checkout",
                     str(args.leb_checkout),
-                    "--output-root",
-                    str(root),
                 ],
+                env=environment,
                 capture_output=True,
                 text=True,
                 timeout=900,
