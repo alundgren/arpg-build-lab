@@ -9,8 +9,17 @@ Use the [project names and ownership](architecture.md#names-and-responsibilities
 in issues as well as PRs. A reader should be able to trace a named responsibility
 from the request through its diagram to the owning module. Use the same terms
 for the same behavior and mark proposed components as future work. Update active
-work descriptions when an agreed rename changes their meaning; historical
-discussions can retain their original terms with a link to the current decision.
+work descriptions when an agreed rename changes their meaning. Include open
+epics even when their milestones remain unrefined; their wording guides later
+issue breakdowns. Historical discussions can retain their original terms with
+a link to the current decision.
+
+Keep references to specific epics, issues, and PRs in GitHub. Repository files
+must not contain their numbers, URLs, titles, or progress history. Document the
+current behavior and decisions directly. Keep task-completion narratives and
+evidence in GitHub; learning reports may record experiment results. General
+workflow rules and templates may describe how to use GitHub work items without
+identifying a real one.
 
 ## Commits and PR titles
 
@@ -111,9 +120,9 @@ Re-read eligibility and existing claims before claiming, then verify the label.
 Never remove another worker's claim or treat the label alone as proof of your
 own ownership.
 
-The initial project epic preserves the unrefined handoff. Its `epic` label keeps
-it out of direct implementation selection. Its body states that it has not been
-refined; do not also add `needs-refinement` or a readiness label.
+An unrefined epic's `epic` label keeps it out of direct implementation selection.
+State its refinement status in its body; do not also add `needs-refinement` or
+a readiness label.
 
 Use native GitHub sub-issues and dependencies when planning work that needs
 them. Implement changes through PRs using the guidance above.

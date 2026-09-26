@@ -83,7 +83,9 @@ def _number(value: Any, path: str, optional: bool = False) -> None:
     if value is None and optional:
         return
     if type(value) not in (int, float) or not math.isfinite(value):
-        raise ValueError(f"{path} must be a finite number{' or null' if optional else ''}")
+        raise ValueError(
+            f"{path} must be a finite number{' or null' if optional else ''}"
+        )
 
 
 def _fields(value: dict[str, Any], names: set[str], path: str) -> None:
@@ -93,7 +95,18 @@ def _fields(value: dict[str, Any], names: set[str], path: str) -> None:
 
 def _tree(value: Any, path: str) -> None:
     obj = _object(value, path)
-    _fields(obj, {"source_tree_id", "source_namespace", "selected", "level", "slot_number", "source_version"}, path)
+    _fields(
+        obj,
+        {
+            "source_tree_id",
+            "source_namespace",
+            "selected",
+            "level",
+            "slot_number",
+            "source_version",
+        },
+        path,
+    )
     _string(obj["source_tree_id"], f"{path}.source_tree_id", True)
     _string(obj["source_namespace"], f"{path}.source_namespace")
     for node, points in _object(obj["selected"], f"{path}.selected").items():
@@ -104,7 +117,18 @@ def _tree(value: Any, path: str) -> None:
 
 def _affix(value: Any, path: str) -> None:
     obj = _object(value, path)
-    _fields(obj, {"source_id", "source_namespace", "translated_id", "tier", "roll", "source_fields"}, path)
+    _fields(
+        obj,
+        {
+            "source_id",
+            "source_namespace",
+            "translated_id",
+            "tier",
+            "roll",
+            "source_fields",
+        },
+        path,
+    )
     _string(obj["source_id"], f"{path}.source_id")
     _string(obj["source_namespace"], f"{path}.source_namespace")
     _integer(obj["translated_id"], f"{path}.translated_id", True)
@@ -115,7 +139,14 @@ def _affix(value: Any, path: str) -> None:
 
 def _item(value: Any, path: str, idol: bool = False) -> None:
     obj = _object(value, path)
-    names = {"source_id", "source_namespace", "translation", "affixes", "special_affixes", "source_fields"}
+    names = {
+        "source_id",
+        "source_namespace",
+        "translation",
+        "affixes",
+        "special_affixes",
+        "source_fields",
+    }
     if idol:
         names |= {"x", "y"}
     _fields(obj, names, path)
@@ -123,13 +154,19 @@ def _item(value: Any, path: str, idol: bool = False) -> None:
     _string(obj["source_namespace"], f"{path}.source_namespace")
     if obj["translation"] is not None:
         translation = _object(obj["translation"], f"{path}.translation")
-        _fields(translation, {"base_type_id", "sub_type_id", "unique_id", "lookup_extra"}, f"{path}.translation")
+        _fields(
+            translation,
+            {"base_type_id", "sub_type_id", "unique_id", "lookup_extra"},
+            f"{path}.translation",
+        )
         for key in ("base_type_id", "sub_type_id", "unique_id"):
             _integer(translation[key], f"{path}.translation.{key}", True)
         _object(translation["lookup_extra"], f"{path}.translation.lookup_extra")
     for i, affix in enumerate(_array(obj["affixes"], f"{path}.affixes")):
         _affix(affix, f"{path}.affixes[{i}]")
-    for name, affix in _object(obj["special_affixes"], f"{path}.special_affixes").items():
+    for name, affix in _object(
+        obj["special_affixes"], f"{path}.special_affixes"
+    ).items():
         _affix(affix, f"{path}.special_affixes.{name}")
     _object(obj["source_fields"], f"{path}.source_fields")
     if idol:
@@ -164,18 +201,32 @@ class BuildSnapshot:
     def from_dict(cls, value: dict[str, Any]) -> "BuildSnapshot":
         obj = _object(value, "snapshot")
         _fields(obj, set(cls.__dataclass_fields__), "snapshot")
-        if obj["schema_version"] != SCHEMA_VERSION or type(obj["schema_version"]) is not int:
-            raise ValueError(f"Unsupported snapshot schema version: {obj['schema_version']!r}")
+        if (
+            obj["schema_version"] != SCHEMA_VERSION
+            or type(obj["schema_version"]) is not int
+        ):
+            raise ValueError(
+                f"Unsupported snapshot schema version: {obj['schema_version']!r}"
+            )
         _string(obj["game_version"], "game_version", True)
         versions = _object(obj["version_evidence"], "version_evidence")
         for key, evidence in versions.items():
             _string(evidence, f"version_evidence.{key}", True)
-        for key in ("importer_version", "lookup_revision", "source_url", "source_id", "raw_path", "raw_sha256"):
+        for key in (
+            "importer_version",
+            "lookup_revision",
+            "source_url",
+            "source_id",
+            "raw_path",
+            "raw_sha256",
+        ):
             _string(obj[key], key)
         if not re.fullmatch(r"[0-9a-f]{64}", obj["raw_sha256"]):
             raise ValueError("raw_sha256 must be a lowercase SHA-256 hex digest")
         character = _object(obj["character"], "character")
-        _fields(character, {"class_id", "mastery_id", "level", "source_fields"}, "character")
+        _fields(
+            character, {"class_id", "mastery_id", "level", "source_fields"}, "character"
+        )
         for key in ("class_id", "mastery_id", "level"):
             _integer(character[key], f"character.{key}", True)
         _object(character["source_fields"], "character.source_fields")
@@ -193,7 +244,9 @@ class BuildSnapshot:
         for kind, values in diagnostics.items():
             for i, item_id in enumerate(_array(values, f"unresolved.{kind}")):
                 _string(item_id, f"unresolved.{kind}[{i}]")
-        for i, section in enumerate(_array(obj["unsupported_sections"], "unsupported_sections")):
+        for i, section in enumerate(
+            _array(obj["unsupported_sections"], "unsupported_sections")
+        ):
             _string(section, f"unsupported_sections[{i}]")
         try:
             json.dumps(obj, allow_nan=False)

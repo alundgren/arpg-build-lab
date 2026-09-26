@@ -6,8 +6,37 @@ Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run
 `uv python install` and `uv sync --locked` from the repository root.
 The committed `.python-version` selects Python 3.14 for development and CI;
 `requires-python` sets 3.14 as the minimum supported version.
-Run the offline checks with
-`uv run --locked python -m unittest discover -s src/arpg_build_lab/importers/tests`.
+Run the same offline checks as CI:
+
+```bash
+uv run --locked ruff check .
+uv run --locked ruff format --check .
+uv run --locked python -m unittest discover -s src/arpg_build_lab/importers/tests
+```
+
+[Ruff](https://docs.astral.sh/ruff/) provides linting, import sorting, and Python
+formatting. It comes from Astral, which also maintains uv, and supports Python
+3.14. It is a development dependency pinned by `uv.lock`. Use the formatter's
+defaults and the lint rules selected in `pyproject.toml`. Apply safe lint fixes
+with `uv run --locked ruff check --fix .`, then run `uv run --locked ruff format .`.
+Review the changes and rerun the checks. Formatting choices belong to Ruff.
+The code-comment ban and rules against work-item references and task-completion
+narratives are review rules; Ruff does not enforce those repository policies.
+
+Run complexity advisories separately:
+
+```bash
+uv run --locked ruff check --select C901,PLR0912,PLR0915 --exit-zero .
+```
+
+Ruff reports functions exceeding its defaults of 10 for cyclomatic complexity,
+12 branches, or 50 statements. These findings prompt review and do not fail CI.
+They measure control flow and statements, not physical file length. Review long
+files and functions for responsibilities that would be clearer apart. Simplify
+when it improves understanding; keep related code together when splitting it
+would add indirection. Do not split code just to lower a count or hide findings
+with suppressions. Explain material retained complexity in the PR's Evidence
+section. Keep these advisories separate from required lint and formatting checks.
 
 The runtime uses the Python standard library; `uv.lock` records the project
 environment. `uv build` creates the source distribution and wheel using

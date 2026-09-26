@@ -17,14 +17,26 @@ def _invalid_constant(value: str) -> None:
     raise ValueError(f"Invalid JSON number: {value}")
 
 
-def save(raw: bytes, snapshot: BuildSnapshot, root: Path = Path("artifacts"),
-         *, input_path: Path | None = None) -> Path:
-    bucket = snapshot.game_version if snapshot.game_version and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]*", snapshot.game_version) else "unknown"
+def save(
+    raw: bytes,
+    snapshot: BuildSnapshot,
+    root: Path = Path("artifacts"),
+    *,
+    input_path: Path | None = None,
+) -> Path:
+    bucket = (
+        snapshot.game_version
+        if snapshot.game_version
+        and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9.-]*", snapshot.game_version)
+        else "unknown"
+    )
     run = f"letools-{snapshot.source_id}-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid4().hex[:8]}"
     location = root / bucket / "imports" / run
     location.mkdir(parents=True, exist_ok=False)
     (location / "raw.json").write_bytes(raw)
-    (location / "snapshot.json").write_text(json.dumps(snapshot.to_dict(), indent=2, sort_keys=True, allow_nan=False) + "\n")
+    (location / "snapshot.json").write_text(
+        json.dumps(snapshot.to_dict(), indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
     provenance = {
         "imported_at_utc": datetime.now(timezone.utc).isoformat(),
         "input_kind": "saved_response" if input_path else "direct_request",
@@ -36,13 +48,17 @@ def save(raw: bytes, snapshot: BuildSnapshot, root: Path = Path("artifacts"),
         "importer_version": snapshot.importer_version,
         "lookup_revision": snapshot.lookup_revision,
     }
-    (location / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True) + "\n")
+    (location / "provenance.json").write_text(
+        json.dumps(provenance, indent=2, sort_keys=True) + "\n"
+    )
     return location
 
 
 def load(location: Path) -> BuildSnapshot:
     path = location / "snapshot.json"
-    snapshot = BuildSnapshot.from_dict(json.loads(path.read_text(), parse_constant=_invalid_constant))
+    snapshot = BuildSnapshot.from_dict(
+        json.loads(path.read_text(), parse_constant=_invalid_constant)
+    )
     raw_path = Path(snapshot.raw_path)
     if raw_path.is_absolute() or ".." in raw_path.parts:
         raise ValueError("Snapshot raw_path must stay within its run directory")
@@ -54,20 +70,36 @@ def load(location: Path) -> BuildSnapshot:
 
 def summary(snapshot: BuildSnapshot, location: Path) -> str:
     passive_points = sum(snapshot.passives["selected"].values())
-    lines = [f"Game version: {snapshot.game_version or 'unknown'}",
-             f"Class/mastery: {snapshot.character['class_id']}/{snapshot.character['mastery_id']}; level: {snapshot.character['level']}",
-             f"Passives: {len(snapshot.passives['selected'])} nodes, {passive_points} points",
-             f"Skills: {len(snapshot.skills)} trees; " + ", ".join(f"{s['source_tree_id']} (slot {s['slot_number']}, level {s['level']})" for s in snapshot.skills),
-             f"Equipment: {len(snapshot.equipment)} slots; idols: {len(snapshot.idols)}; blessings: {len(snapshot.blessings)}",
-             "Equipment IDs: " + ", ".join(f"{slot}={item['source_id']}" for slot, item in snapshot.equipment.items()),
-             "Idol positions: " + ", ".join(f"({item['x']},{item['y']})={item['source_id']}" for item in snapshot.idols),
-             "Blessing IDs: " + ", ".join(f"{slot}={item['source_id']}" for slot, item in snapshot.blessings.items()),
-             f"Unresolved LETools item IDs: {', '.join(snapshot.unresolved['item_ids']) or 'none'}",
-             f"Unresolved LETools affix IDs: {', '.join(snapshot.unresolved['affix_ids']) or 'none'}",
-             f"Unresolved LETools blessing IDs: {', '.join(snapshot.unresolved['blessing_ids']) or 'none'}",
-             f"Unsupported source sections in raw response: {', '.join(snapshot.unsupported_sections) or 'none'}",
-             f"Raw: {location / 'raw.json'}", f"Snapshot: {location / 'snapshot.json'}",
-             f"Provenance: {location / 'provenance.json'}"]
+    lines = [
+        f"Game version: {snapshot.game_version or 'unknown'}",
+        f"Class/mastery: {snapshot.character['class_id']}/{snapshot.character['mastery_id']}; level: {snapshot.character['level']}",
+        f"Passives: {len(snapshot.passives['selected'])} nodes, {passive_points} points",
+        f"Skills: {len(snapshot.skills)} trees; "
+        + ", ".join(
+            f"{s['source_tree_id']} (slot {s['slot_number']}, level {s['level']})"
+            for s in snapshot.skills
+        ),
+        f"Equipment: {len(snapshot.equipment)} slots; idols: {len(snapshot.idols)}; blessings: {len(snapshot.blessings)}",
+        "Equipment IDs: "
+        + ", ".join(
+            f"{slot}={item['source_id']}" for slot, item in snapshot.equipment.items()
+        ),
+        "Idol positions: "
+        + ", ".join(
+            f"({item['x']},{item['y']})={item['source_id']}" for item in snapshot.idols
+        ),
+        "Blessing IDs: "
+        + ", ".join(
+            f"{slot}={item['source_id']}" for slot, item in snapshot.blessings.items()
+        ),
+        f"Unresolved LETools item IDs: {', '.join(snapshot.unresolved['item_ids']) or 'none'}",
+        f"Unresolved LETools affix IDs: {', '.join(snapshot.unresolved['affix_ids']) or 'none'}",
+        f"Unresolved LETools blessing IDs: {', '.join(snapshot.unresolved['blessing_ids']) or 'none'}",
+        f"Unsupported source sections in raw response: {', '.join(snapshot.unsupported_sections) or 'none'}",
+        f"Raw: {location / 'raw.json'}",
+        f"Snapshot: {location / 'snapshot.json'}",
+        f"Provenance: {location / 'provenance.json'}",
+    ]
     if snapshot.game_version is None:
         lines.insert(1, f"Version evidence: {snapshot.version_evidence}")
     return "\n".join(lines)
@@ -76,7 +108,9 @@ def summary(snapshot: BuildSnapshot, location: Path) -> str:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Save one LETools planner build")
     parser.add_argument("url", help="Explicit HTTPS LETools planner URL")
-    parser.add_argument("--raw-file", type=Path, help="Import an existing raw JSON response offline")
+    parser.add_argument(
+        "--raw-file", type=Path, help="Import an existing raw JSON response offline"
+    )
     parser.add_argument("--output-root", type=Path, default=Path("artifacts"))
     args = parser.parse_args(argv)
     try:

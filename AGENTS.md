@@ -70,6 +70,19 @@ them or their terminology merely to follow a named pattern.
 Use established ML terms for ML concepts. Qualify overlapping software terms
 rather than redefining them; follow the ML vocabulary in the architecture guide.
 
+Do not put references to specific epics, issues, or pull requests in repository
+files. Keep their numbers, URLs, titles, and progress history in GitHub. General
+contribution guidance may describe how to work with them. Repository docs must
+explain the current system and decisions without relying on a work item. Keep
+task-completion narratives and evidence in GitHub. Learning reports may record
+experiment methods, measurements, and findings.
+
+Do not write code comments. Docstrings may describe behavior and contracts;
+they must not contain work-item references or task-completion narratives. Use
+clear names and straightforward code. Put design explanations in the owning
+module's documentation. Use Ruff for Python linting and formatting, following
+the development guide.
+
 Own a small, versioned build representation, `BuildSnapshot`. Importers own
 external build formats; build evaluators own calculator integration and results.
 Retain the game version and relevant provenance in every persisted build,

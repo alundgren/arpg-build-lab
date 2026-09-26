@@ -12,3 +12,11 @@ arpg-import = "arpg_build_lab.importers.cli:main"
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13"]
 build-backend = "uv_build"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.16.9",
+]

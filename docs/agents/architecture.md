@@ -30,8 +30,9 @@ its name does not require a DDD layer structure.
 
 Paths in this document are relative to `src/arpg_build_lab/` unless stated
 otherwise. Keep narrow terminology beside the owning module in its README or
-docstring. Python types and their persisted contracts define fields and allowed
-values; do not duplicate them in a separate naming or ontology registry.
+an appropriate contract docstring. Python types and their persisted contracts
+define fields and allowed values; do not duplicate them in a separate naming
+or ontology registry.
 
 Use these rules when adding or changing code:
 
@@ -52,9 +53,9 @@ Use these rules when adding or changing code:
 - If a function or module needs several unrelated names to explain its work,
   inspect its responsibilities. A glossary alias cannot fix unclear ownership.
 - Rename code, callers, tests, current documentation, and diagrams together.
-  Update affected active issues and PRs. Treat names in saved data, public
-  commands, and external APIs as compatibility contracts; plan migration when
-  they change.
+  Update affected active issues, including open epics, and PRs. Treat names in
+  saved data, public commands, and external APIs as compatibility contracts;
+  plan migration when they change.
 
 Current import operations have distinct meanings:
 
