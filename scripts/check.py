@@ -53,6 +53,19 @@ def main() -> int:
                 "test_evaluation.py",
             ],
         ),
+        (
+            "dataset tests",
+            [
+                *run,
+                "python",
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                "src/arpg_build_lab/datasets/tests",
+                "--buffer",
+            ],
+        ),
         ("build", ["uv", "build"]),
     ]
     for name, command in checks:

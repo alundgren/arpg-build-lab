@@ -1,8 +1,9 @@
 # Continue the project
 
 The repository has a runnable LETools importer, versioned `BuildSnapshot` and
-`BuildEvaluation` records, a narrow Last Epoch Building evaluator, offline
-tests, and Linux/macOS CI. Setup and command use are in `development.md`.
+`BuildEvaluation` records, a narrow Last Epoch Building evaluator, an exhaustive
+two-passive Sentinel dataset command, offline tests, and Linux/macOS CI. Setup
+and command use are in `development.md`.
 
 Choose future work from the active GitHub planning documents. Everyday component
 work should use the relevant local instructions and contracts. Keep planning
@@ -12,10 +13,12 @@ status in GitHub and document current capabilities here.
 
 The importer is under `src/arpg_build_lab/importers/`, the build records are
 under `src/arpg_build_lab/domain/`, and the supported 1.4.7 Sentinel evaluator
-is under `src/arpg_build_lab/evaluators/`. The next task should come from active
-GitHub planning. Other build versions and content need explicit compatibility
-checks before evaluation.
+is under `src/arpg_build_lab/evaluators/`. The dataset command and manifest
+loader are under `src/arpg_build_lab/datasets/`. The next task should come from
+active GitHub planning. Other build versions and content need explicit
+compatibility checks before evaluation.
 
 Use synthetic or permission-checked fixtures for automated checks. Live network
-access is not required for the default tests. Data generation, ML, search, and
-UI remain future work.
+access is not required for the default tests. The current generator exhausts
+only Fearless and Armour Clad passive point allocations for one supported saved starting snapshot. ML,
+search, and UI remain future work.

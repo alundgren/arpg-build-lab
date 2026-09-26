@@ -9,6 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from uuid import uuid4
 
+from arpg_build_lab.artifacts import resolve_artifact_root
 from arpg_build_lab.domain.snapshot import BuildSnapshot
 from arpg_build_lab.importers.letools import (
     ImportError,
@@ -25,10 +26,11 @@ def _invalid_constant(value: str) -> None:
 def save(
     raw: bytes,
     snapshot: BuildSnapshot,
-    root: Path = Path("artifacts"),
+    root: Path | None = None,
     *,
     input_path: Path | None = None,
 ) -> Path:
+    output_root = resolve_artifact_root(root)
     bucket = (
         snapshot.game_version
         if snapshot.game_version
@@ -36,7 +38,7 @@ def save(
         else "unknown"
     )
     run = f"letools-{snapshot.source_id}-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid4().hex[:8]}"
-    location = root / bucket / "imports" / run
+    location = output_root / bucket / "imports" / run
     location.mkdir(parents=True, exist_ok=False)
     (location / "raw.json").write_bytes(raw)
     (location / "snapshot.json").write_text(
@@ -122,6 +124,7 @@ def summary(snapshot: BuildSnapshot, location: Path) -> str:
         f"Raw: {location / 'raw.json'}",
         f"Snapshot: {location / 'snapshot.json'}",
         f"Provenance: {location / 'provenance.json'}",
+        f"Saved import: {location}",
     ]
     if snapshot.game_version is None:
         lines.insert(1, f"Version evidence: {snapshot.version_evidence}")
@@ -134,7 +137,11 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--raw-file", type=Path, help="Import an existing raw JSON response offline"
     )
-    parser.add_argument("--output-root", type=Path, default=Path("artifacts"))
+    parser.add_argument(
+        "--output-root",
+        type=Path,
+        help="Artifact root (overrides ARPG_BUILD_LAB_ARTIFACTS_ROOT)",
+    )
     args = parser.parse_args(argv)
     try:
         raw = args.raw_file.read_bytes() if args.raw_file else fetch(args.url)

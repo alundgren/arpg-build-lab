@@ -10,7 +10,7 @@ Hypothesis:
 - Code revision and command/configuration:
 - Game and schema versions:
 - Dataset identity, provenance, and size:
-- Source builds, generator and build evaluator versions, and seed:
+- Source builds, generator and build evaluator versions, and random seed:
 - Feature representation and prediction target, including units:
 - Train/validation/test split and related-build grouping:
 - Model/baseline, parameter count, and relevant hyperparameters:

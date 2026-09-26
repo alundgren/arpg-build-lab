@@ -5,7 +5,7 @@ URL. For a direct import it requests only `/api/public/build_data/<id>`, with a
 20-second timeout, a browser-compatible User-Agent, and redirects disabled.
 The optional `--raw-file` reads a saved response and makes no HTTP request.
 Both paths call `parse_build()` and save a new run; they never overwrite an old
-one.
+one. The command prints the saved import directory to pass to later commands.
 
 The snapshot includes class, mastery, level, passive selections, skill trees,
 equipment, idol coordinates, and blessings. Numeric IDs may lack names. Item
@@ -19,6 +19,9 @@ unsupported response and `data` sections in the summary.
 Malformed JSON and structural errors fail before an artifact is saved. The game
 version is established only when `created_for_build`, `data_version`, and
 `data.dataVersion` all exist as version strings and agree. Missing
-or conflicting game versions save under `artifacts/unknown/` and show the
+or conflicting game versions save under `<artifact-root>/unknown/` and show the
 original version fields in the summary. An offline replay records its import
 time and input path; the original fetch time is not inferred.
+`ARPG_BUILD_LAB_ARTIFACTS_ROOT` can put new runs outside a worktree. An explicit
+`--output-root` wins; see the
+[development guide](../../../docs/agents/development.md#current-setup).

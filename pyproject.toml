@@ -9,6 +9,7 @@ dependencies = []
 [project.scripts]
 arpg-import = "arpg_build_lab.importers.cli:main"
 arpg-evaluate = "arpg_build_lab.cli:main"
+arpg-dataset = "arpg_build_lab.datasets.cli:main"
 
 [project.optional-dependencies]
 calculator = ["lupa==2.8"]

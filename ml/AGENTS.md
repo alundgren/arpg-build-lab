@@ -16,9 +16,9 @@ estimates. A build evaluator runs a calculator; model evaluation measures an
 ML model's predictive quality.
 
 Start with an intentionally narrow prediction target and useful baselines.
-Record the dataset, feature definition, split, seed, model, parameter count,
+Record the dataset, feature definition, split, random seed, model, parameter count,
 training time, train/validation errors, and worst predictions. When mutations
-share a seed build, make the split policy explicit so related builds do not
+share a starting snapshot, make the split policy explicit so related builds do not
 accidentally make validation look better than it is.
 
 Keep game versions separate unless a named experiment deliberately measures

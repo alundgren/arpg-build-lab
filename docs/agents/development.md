@@ -64,6 +64,7 @@ series when selected on 2026-09-26; no current dependency requires support for
 an older interpreter. Both distributions include our license, third-party
 notices, and the lookup data's original license.
 
+The relative paths in these examples assume the default `./artifacts/` root.
 Request one identified LETools planner build with
 `uv run --locked arpg-import https://www.lastepochtools.com/planner/<id>`.
 To replay a previously saved response without network access, add
@@ -83,6 +84,44 @@ See `src/arpg_build_lab/evaluators/README.md` for supported input and synthetic
 examples. `python3 scripts/check.py` remains offline. The explicit engine check
 is `uv run --locked --extra calculator python scripts/check_real_engine.py --leb-checkout <checkout>`;
 CI runs it on Linux and macOS.
+
+To generate every supported passive point allocation for one saved import, run
+`uv run --locked --extra calculator arpg-dataset artifacts/1.4.7/imports/<run-id> --leb-checkout <checkout>`.
+The command writes an ignored dataset under `artifacts/1.4.7/datasets/` and
+prints the calculator reference ranges, candidate count, and measured time.
+Its [contract and offline synthetic example](../../src/arpg_build_lab/datasets/README.md)
+describe retained files and validated reload. Nearby mutations of one starting snapshot
+do not show generalization to untouched or complete builds.
+
+Worktrees can share an artifact root outside the checkout:
+
+```bash
+export ARPG_BUILD_LAB_ARTIFACTS_ROOT="$HOME/.local/share/arpg-build-lab/artifacts"
+```
+
+`arpg-import`, `arpg-evaluate`, and `arpg-dataset` use this root for new runs.
+An explicit `--output-root` overrides it. Without either setting, output stays
+under `./artifacts/`. The same precedence applies when Python callers omit the
+root argument to `importers.cli.save`, `evaluators.le_building.evaluate`, or
+`datasets.cli.generate`. The variable is read for each invocation; `~` expands
+to the home directory. Relative roots are relative to the current working
+directory, so use an absolute path when sharing data across worktrees. Pass the
+full path of an existing import run to evaluation or dataset commands. Sharing
+storage does not make builds or evaluations from different game versions
+compatible; saved version and hash checks still apply. Existing artifacts stay
+where they were written until moved explicitly.
+
+After setting the shared root, use the import path printed by `arpg-import` as
+the positional input to `arpg-evaluate` or `arpg-dataset`. For example:
+
+```bash
+uv run --locked --extra calculator arpg-dataset \
+  "$ARPG_BUILD_LAB_ARTIFACTS_ROOT/1.4.7/imports/<run-id>" \
+  --leb-checkout <checkout>
+```
+
+The root setting selects where new runs are written. It does not search for or
+relocate an input import run.
 
 Keep application code in Python until a concrete problem justifies another
 language. External tools and libraries may use other runtimes. Document any
@@ -144,16 +183,17 @@ record the device/backend with experiment results.
 
 ## Artifact storage
 
-Use `artifacts/<game-version>/<kind>/<run-id>/` once real data exists. Kinds may
+Use `<artifact-root>/<game-version>/<kind>/<run-id>/` once real data exists. Kinds may
 include imports, datasets, models, and runs. The contents are ignored by Git.
-Use an explicit `unknown` bucket while investigating an import whose game
+The default root is `./artifacts/`; a shared external root must be kept out of
+Git separately. Use an explicit `unknown` bucket while investigating an import whose game
 version is unavailable; do not treat it as version-qualified training data.
 
 Record enough metadata to reproduce a dataset or experiment: game/schema
 versions, source build identity and provenance, generator and build evaluator
-versions, seed, feature definition, split, configuration, relevant dependency
+versions, random seed, feature definition, split, configuration, relevant dependency
 versions, device, and code revision. Add content hashes where they are needed
-to identify exact inputs. A declared seed alone does not prove reproducibility.
+to identify exact inputs. A declared random seed alone does not prove reproducibility.
 
 Commit small synthetic or permission-checked fixtures near their owning tests.
 Commit selected charts and measured summaries in human experiment reports.

@@ -47,6 +47,7 @@ those settings. It also verifies that no item, skill, or equipment slot is
 loaded.
 
 The author-created fixtures in `tests/fixtures/` can be imported offline:
+These relative artifact paths assume the default `./artifacts/` root.
 
 ```bash
 uv run --locked arpg-import https://www.lastepochtools.com/planner/ABC12345 --raw-file src/arpg_build_lab/evaluators/tests/fixtures/sentinel-baseline.json
@@ -56,11 +57,17 @@ uv run --locked --extra calculator python scripts/check_real_engine.py --leb-che
 
 The baseline gives health 206 and armour 0. The allocated fixture gives
 health 236 and armour 16. The explicit check imports both, repeats the
-baseline, and mutates canonical passive allocations while retaining the same
-raw response to prove that the evaluator uses the snapshot.
+baseline, and mutates canonical passive point allocations while retaining the
+same raw response to prove that the evaluator uses the snapshot.
+With a shared artifact root, pass the saved import path printed by
+`arpg-import` to `arpg-evaluate`. The output root does not locate inputs.
 
-Each success creates a new ignored `artifacts/1.4.7/evaluations/<run-id>/`
-directory. `evaluation.json` is `BuildEvaluation` schema 1. It links
+With the default root, each success creates a new ignored
+`artifacts/1.4.7/evaluations/<run-id>/` directory.
+`ARPG_BUILD_LAB_ARTIFACTS_ROOT` selects a shared output root across worktrees;
+`--output-root` overrides it. See the
+[development guide](../../../docs/agents/development.md#current-setup).
+`evaluation.json` is `BuildEvaluation` schema 1. It links
 `snapshot.json`, `calculator-input.xml`, `calculator-output.json`, and
 `diagnostics.json` by SHA-256. `snapshot_sha256` hashes UTF-8 JSON of the
 evaluated snapshot with sorted keys, compact separators, no ASCII escaping,
