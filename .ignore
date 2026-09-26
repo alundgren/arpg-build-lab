@@ -1,0 +1,4 @@
+# Human learning material is opt-in during agent discovery and search.
+# These files remain tracked by Git. For an explicit documentation task:
+# rg --no-ignore 'topic' docs/humans
+/docs/humans/

@@ -1,0 +1,25 @@
+# Local environments and dependencies
+.DS_Store
+.env
+.env.*
+!.env.example
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+
+# Build and tool output
+dist/
+build/
+coverage/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.tsbuildinfo
+*.log
+
+# Raw imports, datasets, checkpoints, and run output belong here.
+/artifacts/*
+!/artifacts/AGENTS.md
