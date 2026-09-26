@@ -4,10 +4,12 @@ Own conversion from `BuildSnapshot` to a calculator's input, execution of
 that calculator, and recording its results in `BuildEvaluation`. Domain types
 stay independent of calculator-specific concepts.
 
-Before choosing an integration, check the upstream license, supported game
-versions, and headless execution path. Keep the integration in a build evaluator
-module and prefer calling the external tool over copying its implementation.
-Last Epoch Building and The Forge are candidates, not current dependencies.
+The current integration calls a pinned Last Epoch Building checkout for a
+limited 1.4.7 Sentinel subset. Keep its source and game data outside the
+package and its Lupa runtime optional for ordinary importing. Read the local
+README for supported inputs, execution, and retained output. Check upstream
+license, game version, and headless entry point before expanding support or
+adding another calculator.
 
 Record build evaluator identity/version and game version with results. Retain raw
 output in ignored artifacts for investigation. Expose unsupported calculations

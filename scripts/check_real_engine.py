@@ -46,8 +46,18 @@ def main() -> None:
                 capture_output=True,
                 text=True,
                 timeout=90,
-                check=True,
+                check=False,
             )
+            if process.returncode:
+                print(
+                    f"Real LEB command failed for {run} (exit {process.returncode})",
+                    file=sys.stderr,
+                )
+                if process.stdout.strip():
+                    print(process.stdout.rstrip(), file=sys.stderr)
+                if process.stderr.strip():
+                    print(process.stderr.rstrip(), file=sys.stderr)
+                raise SystemExit(process.returncode)
             assert "Calculator reference results for Last Epoch 1.4.7" in process.stdout
             assert (
                 "health points" in process.stdout and "armour rating" in process.stdout

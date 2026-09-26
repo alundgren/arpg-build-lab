@@ -1,7 +1,8 @@
 # Architecture direction
 
-The LETools importer produces a versioned `BuildSnapshot`. Build evaluators,
-datasets, and ML models remain future work.
+The LETools importer produces a versioned `BuildSnapshot`. The Last Epoch
+Building evaluator calculates health and armour for a narrow 1.4.7 Sentinel
+subset. Datasets and ML models remain future work.
 
 ## Two goals
 
@@ -26,7 +27,8 @@ its name does not require a DDD layer structure.
 | Raw response | The original LETools response bytes retained for later interpretation. | `raw.json`, saved by `importers/cli.py` |
 | Import run | One import's output directory containing raw response, snapshot, and provenance files. | `importers/cli.py:save` |
 | LETools importer | Code that retrieves a requested LETools response and translates it into a build snapshot. | `importers/letools.py` |
-| Build evaluator | Planned code that runs a calculator for a build snapshot and records its results in `BuildEvaluation`. | Reserved `evaluators/` directory; no implementation yet |
+| Build evaluator | Code that runs a calculator for a supported build snapshot and records its reference results. | `evaluators/le_building.py` and [its limits](../../src/arpg_build_lab/evaluators/README.md) |
+| Build evaluation | A versioned record of the evaluated snapshot, calculator provenance, metrics, and retained-file hashes. | `BuildEvaluation` in `domain/evaluation.py` and its [format contract](../../src/arpg_build_lab/domain/README.md) |
 
 Paths in this document are relative to `src/arpg_build_lab/` unless stated
 otherwise. Keep narrow terminology beside the owning module in its README or
@@ -125,10 +127,30 @@ Saved raw JSON -----------------------------+
 
 The LETools importer in `importers/letools.py` translates external data into
 `BuildSnapshot`. Saved files can be inspected directly, and `load()` validates the
-snapshot and raw-response hash. Replaying a raw response through the command
+snapshot, raw-response hash, and retained version evidence. Replaying a raw response through the command
 runs `parse_build()` again and writes a new saved build.
 
-## Future evaluation and ML
+## Current evaluation flow
+
+The `arpg-evaluate` command in `cli.py` loads an existing import run and checks
+the source content supported by `evaluators/le_building.py`. The evaluator
+converts canonical snapshot fields to LEB XML, runs the pinned calculator in a
+fresh process, and checks the loaded build before accepting its metrics.
+
+```text
+importers/cli.py:load -> domain/snapshot.py:BuildSnapshot
+                            |
+                            v
+                evaluators/le_building.py:evaluate
+                            |
+                            v
+              domain/evaluation.py:BuildEvaluation
+                            |
+                            v
+             evaluation.json + retained inputs/output
+```
+
+## Future ML
 
 The following responsibilities remain planned. These labels describe intended
 work, not additional implemented modules.
@@ -160,14 +182,14 @@ the actual calls, dependencies, or data flow described by the diagram.
 | --- | --- | --- |
 | `src/arpg_build_lab/domain/` | Build data and validity rules | No importer, build evaluator, command, or ML dependencies |
 | `src/arpg_build_lab/importers/` | Parse external builds into `BuildSnapshot` | Domain |
-| `src/arpg_build_lab/evaluators/` | Future calculator integration | Domain and chosen calculator integration |
+| `src/arpg_build_lab/evaluators/` | Supported LEB conversion, execution, and metric extraction | Domain and optional Lupa runtime |
 | `ml/` | Future feature preparation, training, and error measurement | Domain and versioned datasets |
 | `scripts/` | Development checks and their output | Python standard library and locked development tools |
 
-The current command, persistence, reload, and summary functions live in
-`importers/cli.py`. Add generation, mutation, search, and further orchestration
-when that work begins. Modules expose the contracts their callers need and keep
-internal representations local.
+Import commands, persistence, reload, and summary live in `importers/cli.py`.
+The evaluation command in `cli.py` coordinates the importer loader and build
+evaluator without a dependency between their packages. Add generation,
+mutation, and search when that work begins.
 
 ## Data that we own
 
@@ -181,10 +203,12 @@ separate. Use stable game IDs when available. Never silently combine game
 versions or infer an exact version without evidence. Unknown version handling
 is an explicit importer decision before build evaluation or dataset use.
 
-`BuildEvaluation` should record only metrics the integration supports, with
-units and missing-value meaning defined. Retain raw results outside Git for
-investigation. Calculator results can disagree; treat them as references when
-using them as regression targets. They do not define our build representation.
+`BuildEvaluation` schema 1 records only supported health and armour metrics,
+with units and a separate meaning for zero and missing values. It links the
+exact evaluated snapshot and retained calculator files by content hash. The
+result sits outside Git. Calculator results can disagree; treat them as
+references when using them as regression targets. They do not define our build
+representation.
 
 ## Application language and integration
 
