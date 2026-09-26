@@ -1,8 +1,8 @@
 # Canonical Last Epoch data
 
-Own the versioned `BuildSnapshot`, build validity rules, and normalized
+Own the versioned `BuildSnapshot`, build validity rules, and
 `BuildEvaluation` contract as they are implemented. Read
-`../../docs/agents/architecture.md` before defining persisted formats.
+`../../../docs/agents/architecture.md` before defining persisted formats.
 
 Prefer stable game IDs to display names. Distinguish schema version from game
 version. Preserve unknown or unsupported information explicitly instead of

@@ -5,6 +5,104 @@ including issues, labels, pull requests, and checks. Keep repository targets
 explicit outside the checkout. For multiline issue or PR text, pass a file with
 `--body-file`.
 
+Use the [project names and ownership](architecture.md#names-and-responsibilities)
+in issues as well as PRs. A reader should be able to trace a named responsibility
+from the request through its diagram to the owning module. Use the same terms
+for the same behavior and mark proposed components as future work. Update active
+work descriptions when an agreed rename changes their meaning. Include open
+epics even when their milestones remain unrefined; their wording guides later
+issue breakdowns. Historical discussions can retain their original terms with
+a link to the current decision.
+
+Keep references to specific epics, issues, and PRs in GitHub. Repository files
+must not contain their numbers, URLs, titles, or progress history. Document the
+current behavior and decisions directly. Keep task-completion narratives and
+evidence in GitHub; learning reports may record experiment results. General
+workflow rules and templates may describe how to use GitHub work items without
+identifying a real one.
+
+## Commits and PR titles
+
+Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
+for commit messages and PR titles: `<type>[optional scope]: <description>`.
+Choose the type that describes the change, such as `feat`, `fix`, `docs`,
+`test`, `perf`, `refactor`, `build`, or `ci`. Use `!` or a `BREAKING CHANGE:`
+footer when the change breaks compatibility, and explain the consequence.
+
+For example, `feat(import): save builds for repeatable experiments` describes
+an outcome; `docs: define PR review and testing guidance` describes this policy.
+
+## PR descriptions
+
+Use [the PR template](../../.github/pull_request_template.md). Keep the body in
+two parts:
+
+1. **Summary** stays visible. Explain the intended outcome and why a human
+   should care. Describe the problem solved or what someone can now do. Keep
+   material limitations visible and link the requested work, using `Closes #N`
+   when appropriate. A shorter inventory of changed files or functions does
+   not explain the value.
+2. **Evidence** contains the agent's supporting work inside
+   `<details><summary>Evidence</summary> ... </details>`. Omit the `open`
+   attribute so it is collapsed by default. Leave blank lines around Markdown
+   inside the block. Keep review records and agent attribution here too.
+
+Put a small ASCII diagram in the visible Summary when it helps a human
+understand the outcome, follow a workflow, or assess an important relationship
+or trade-off. For example, showing how a requested build becomes a saved input
+can make an import change easier to review. A straightforward wording or bug
+fix may need only a sentence. Diagrams are useful when they answer a review
+question; they are not required decoration. Keep detailed checks in Evidence.
+
+Use the same component names as the code, or pair a readable role with its
+actual module path. For example, label `importers/letools.py` as the LETools
+importer instead of introducing an unexplained "LETools adapter" box. Confirm
+that arrows match real data flow or dependencies, and label future components.
+If a diagram cannot be mapped to the code, investigate whether documentation
+has drifted or the code's responsibilities are unclear before changing labels.
+
+During review, check changed file and folder names, public types and functions,
+persisted fields, and diagram labels against the same vocabulary and ownership.
+Report concrete cases where one concept has competing names, or one name hides
+different responsibilities. Verify renames include callers and current docs,
+and account for compatibility of saved formats and public commands. This is a
+semantic review; do not add tests that freeze the current file list or private
+helper names.
+
+Make the evidence specific enough for a reviewer to check:
+
+- Connect the requested outcome and acceptance criteria to observed results.
+  Include relevant failure cases and limitations of the evidence.
+- Explain how the change follows the applicable architectural guidance. Point
+  to relevant modules, dependencies, data contracts, and source locations. State
+  any justified exceptions. A claim that "architecture was followed" is not
+  evidence.
+- Follow [testing guidance](development.md#testing-and-validation). Name the
+  behavior checked, the test level, commands or tools, and actual results. Link
+  tests, CI runs, or other inspectable artifacts. Distinguish automated tests
+  from one-off checks and checks performed from checks still planned. Explain
+  any relevant checks that could not be completed.
+
+Use evidence suited to the task. Prefer ASCII diagrams for algorithms,
+processes, and data flow. For visual changes, screenshots or recordings can
+show the result. Benchmarks, test output, and observed user journeys can answer
+other review questions. Include only material that helps assess the outcome.
+
+To keep an image inside the folded section, place a reference such as
+`![Imported build summary](./evidence.png)` there in the body file, then upload
+the same file with `gh pr create --attach` or `gh pr edit --attach`. For example:
+
+```bash
+gh pr edit NUMBER --repo alundgren/arpg-build-lab \
+  --body-file /tmp/pr-body.md --attach ./evidence.png
+```
+
+The CLI replaces the file reference with the uploaded asset URL. Without a
+reference in the body, it appends the attachment instead. Inspect the published
+body to confirm the evidence appears inside the collapsed section. GitHub's
+[collapsed-section guide](https://docs.github.com/en/get-started/writing-on-github/working-with-advanced-formatting/organizing-information-with-collapsed-sections)
+describes the markup.
+
 ## Labels
 
 | Label | Meaning |
@@ -22,11 +120,9 @@ Re-read eligibility and existing claims before claiming, then verify the label.
 Never remove another worker's claim or treat the label alone as proof of your
 own ownership.
 
-The initial project epic preserves the unrefined handoff. Its `epic` label keeps
-it out of direct implementation selection. Its body states that it has not been
-refined; do not also add `needs-refinement` or a readiness label.
+An unrefined epic's `epic` label keeps it out of direct implementation selection.
+State its refinement status in its body; do not also add `needs-refinement` or
+a readiness label.
 
-When later planning is requested, use native GitHub sub-issues and dependencies
-where appropriate. The scaffold creates no implementation leaves or dependency
-links. The initial commit goes directly to `main`; future work follows the
-workflow requested for that task.
+Use native GitHub sub-issues and dependencies when planning work that needs
+them. Implement changes through PRs using the guidance above.
