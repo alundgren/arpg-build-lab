@@ -89,7 +89,7 @@ To generate every supported passive allocation for one saved import, run
 The command writes an ignored dataset under `artifacts/1.4.7/datasets/` and
 prints the calculator reference ranges, candidate count, and measured time.
 Its [contract and offline synthetic example](../../src/arpg_build_lab/datasets/README.md)
-describe retained files and validated reload. Nearby mutations of one seed
+describe retained files and validated reload. Nearby mutations of one starting snapshot
 do not show generalization to untouched or complete builds.
 
 Keep application code in Python until a concrete problem justifies another
@@ -159,9 +159,9 @@ version is unavailable; do not treat it as version-qualified training data.
 
 Record enough metadata to reproduce a dataset or experiment: game/schema
 versions, source build identity and provenance, generator and build evaluator
-versions, seed, feature definition, split, configuration, relevant dependency
+versions, random seed, feature definition, split, configuration, relevant dependency
 versions, device, and code revision. Add content hashes where they are needed
-to identify exact inputs. A declared seed alone does not prove reproducibility.
+to identify exact inputs. A declared random seed alone does not prove reproducibility.
 
 Commit small synthetic or permission-checked fixtures near their owning tests.
 Commit selected charts and measured summaries in human experiment reports.

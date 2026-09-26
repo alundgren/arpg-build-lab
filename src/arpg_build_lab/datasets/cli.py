@@ -29,20 +29,22 @@ def generate(
 ) -> Path:
     if not 0 < timeout <= 600:
         raise ValueError("timeout must be greater than 0 and no more than 600 seconds")
-    seed = load_import(import_run)
-    validate_evaluation_source((import_run / seed.raw_path).read_bytes(), seed)
-    supported(seed)
+    starting_snapshot = load_import(import_run)
+    validate_evaluation_source(
+        (import_run / starting_snapshot.raw_path).read_bytes(), starting_snapshot
+    )
+    supported(starting_snapshot)
     verify_checkout(checkout)
-    planned = candidates(seed)
+    planned = candidates(starting_snapshot)
     run_id = f"sentinel-passives-{datetime.now(timezone.utc):%Y%m%dT%H%M%SZ}-{uuid4().hex[:8]}"
     location = root / "1.4.7" / "datasets" / run_id
     location.mkdir(parents=True, exist_ok=False)
-    seed_dir = location / "seed"
-    seed_dir.mkdir()
-    for name in ("snapshot.json", seed.raw_path, "provenance.json"):
+    starting_snapshot_dir = location / "starting_snapshot"
+    starting_snapshot_dir.mkdir()
+    for name in ("snapshot.json", starting_snapshot.raw_path, "provenance.json"):
         source = import_run / name
         if source.is_file():
-            target = seed_dir / name
+            target = starting_snapshot_dir / name
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
     records = []
@@ -94,18 +96,18 @@ def generate(
     shutil.rmtree(location / "_working")
     manifest = {
         "schema_version": 1,
-        "snapshot_schema_version": seed.schema_version,
+        "snapshot_schema_version": starting_snapshot.schema_version,
         "evaluation_schema_version": 1,
-        "game_version": seed.game_version,
-        "seed": {
-            "path": "seed",
-            "snapshot_sha256": snapshot_hash(seed),
-            "source_url": seed.source_url,
-            "source_id": seed.source_id,
-            "raw_sha256": seed.raw_sha256,
+        "game_version": starting_snapshot.game_version,
+        "starting_snapshot": {
+            "path": "starting_snapshot",
+            "snapshot_sha256": snapshot_hash(starting_snapshot),
+            "source_url": starting_snapshot.source_url,
+            "source_id": starting_snapshot.source_id,
+            "raw_sha256": starting_snapshot.raw_sha256,
             "provenance_sha256": (
-                sha256((seed_dir / "provenance.json").read_bytes())
-                if (seed_dir / "provenance.json").is_file()
+                sha256((starting_snapshot_dir / "provenance.json").read_bytes())
+                if (starting_snapshot_dir / "provenance.json").is_file()
                 else None
             ),
         },

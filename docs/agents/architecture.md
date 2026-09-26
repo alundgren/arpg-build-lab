@@ -3,7 +3,7 @@
 The LETools importer produces a versioned `BuildSnapshot`. The Last Epoch
 Building evaluator calculates health and armour for a narrow 1.4.7 Sentinel
 subset. The dataset command evaluates every supported two-passive allocation
-for one saved seed. ML models remain future work.
+for one saved starting snapshot. ML models remain future work.
 
 ## Two goals
 
@@ -30,7 +30,7 @@ its name does not require a DDD layer structure.
 | LETools importer | Code that retrieves a requested LETools response and translates it into a build snapshot. | `importers/letools.py` |
 | Build evaluator | Code that runs a calculator for a supported build snapshot and records its reference results. | `evaluators/le_building.py` and [its limits](../../src/arpg_build_lab/evaluators/README.md) |
 | Build evaluation | A versioned record of the evaluated snapshot, calculator provenance, metrics, and retained-file hashes. | `BuildEvaluation` in `domain/evaluation.py` and its [format contract](../../src/arpg_build_lab/domain/README.md) |
-| Dataset | One seed import and the ordered, complete set of its supported passive allocations with reference evaluations. | `datasets/` and its [manifest contract](../../src/arpg_build_lab/datasets/README.md) |
+| Dataset | One starting snapshot and the ordered, complete set of its supported passive allocations with reference evaluations. | `datasets/` and its [manifest contract](../../src/arpg_build_lab/datasets/README.md) |
 
 Paths in this document are relative to `src/arpg_build_lab/` unless stated
 otherwise. Keep narrow terminology beside the owning module in its README or
@@ -157,7 +157,7 @@ importers/cli.py:load -> domain/snapshot.py:BuildSnapshot
 `arpg-dataset` in `datasets/cli.py` validates an import run, enumerates
 allocations through `datasets/passive_space.py`, and asks the existing build
 evaluator to calculate each candidate. `datasets/manifest.py:load` checks the
-retained seed raw response and every candidate evaluation after generation or
+retained starting snapshot raw response and every candidate evaluation after generation or
 after moving the dataset run.
 
 ```text
@@ -205,7 +205,7 @@ the actual calls, dependencies, or data flow described by the diagram.
 | `src/arpg_build_lab/domain/` | Build data and validity rules | No importer, build evaluator, command, or ML dependencies |
 | `src/arpg_build_lab/importers/` | Parse external builds into `BuildSnapshot` | Domain |
 | `src/arpg_build_lab/evaluators/` | Supported LEB conversion, execution, and metric extraction | Domain and optional Lupa runtime |
-| `src/arpg_build_lab/datasets/` | One-seed generation, evaluation orchestration, and dataset persistence | Domain, importer, and build evaluator |
+| `src/arpg_build_lab/datasets/` | Generation from one starting snapshot, evaluation orchestration, and dataset persistence | Domain, importer, and build evaluator |
 | `ml/` | Future feature preparation, training, and error measurement | Domain and versioned datasets |
 | `scripts/` | Development checks and their output | Python standard library and locked development tools |
 
@@ -264,7 +264,7 @@ need to check that names mean the same thing in code and documentation.
 
 Begin with a narrow target and compare useful simple baselines before increasing
 model complexity. Generated data and real imported builds serve different
-purposes. The former supplies controlled examples; the latter helps seed and
+purposes. The former supplies controlled examples; the latter helps initialize and
 validate realistic behavior. Keep the experiment's split and scope visible.
 
 Optimization can find predictions the surrogate gets badly wrong. Preserve

@@ -109,15 +109,17 @@ def main() -> None:
         assert changed_result.snapshot_sha256 != mutated.snapshot_sha256
         assert changed_result.metrics["health"]["value"] == 236
         assert changed_result.metrics["armour"]["value"] == 16
-        seed_run = save(baseline_raw, parse_build(baseline_raw, URL), root)
-        seed_files = {path.name: path.read_bytes() for path in seed_run.iterdir()}
+        starting_snapshot_run = save(baseline_raw, parse_build(baseline_raw, URL), root)
+        starting_snapshot_files = {
+            path.name: path.read_bytes() for path in starting_snapshot_run.iterdir()
+        }
         datasets = []
         dataset_dirs = []
         for _ in range(2):
             process = subprocess.run(
                 [
                     str(Path(sys.executable).with_name("arpg-dataset")),
-                    str(seed_run),
+                    str(starting_snapshot_run),
                     "--leb-checkout",
                     str(args.leb_checkout),
                     "--output-root",
@@ -145,13 +147,15 @@ def main() -> None:
             dataset_dirs.append(path)
             datasets.append(load_dataset(path))
         assert {
-            path.name: path.read_bytes() for path in seed_run.iterdir()
-        } == seed_files
+            path.name: path.read_bytes() for path in starting_snapshot_run.iterdir()
+        } == starting_snapshot_files
         first = datasets[0]
         second = datasets[1]
         assert first.manifest["candidate_count"] == 19
         assert first.manifest["measured_calculator_seconds"] > 0
-        assert first.manifest["seed"] == second.manifest["seed"]
+        assert (
+            first.manifest["starting_snapshot"] == second.manifest["starting_snapshot"]
+        )
 
         def ordered_results(dataset, path):
             return [
@@ -179,7 +183,7 @@ def main() -> None:
         assert metrics[(5, 1)]["armour"]["value"] == 16
         moved = root / "moved-dataset"
         shutil.copytree(dataset_dirs[0], moved)
-        shutil.rmtree(seed_run)
+        shutil.rmtree(starting_snapshot_run)
         assert load_dataset(moved).manifest["candidate_count"] == 19
         print(
             f"Dataset real calculator evidence: 19 candidates, {first.manifest['measured_calculator_seconds']:.3f} seconds"

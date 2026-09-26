@@ -26,8 +26,8 @@ def saved(root: Path) -> Path:
     return save(raw, parse_build(raw, URL), root)
 
 
-def at_level(seed: BuildSnapshot, level: int) -> BuildSnapshot:
-    value = seed.to_dict()
+def at_level(starting_snapshot: BuildSnapshot, level: int) -> BuildSnapshot:
+    value = starting_snapshot.to_dict()
     value["character"]["level"] = level
     value["character"]["source_fields"]["level"] = level
     return BuildSnapshot.from_dict(value)
@@ -78,10 +78,10 @@ def fake_evaluate(
 class DatasetTests(unittest.TestCase):
     def test_boundaries_order_and_preserved_fields(self):
         with tempfile.TemporaryDirectory() as temporary:
-            seed = load_import(saved(Path(temporary)))
+            starting_snapshot = load_import(saved(Path(temporary)))
             for level, count in ((1, 1), (10, 19), (14, 29), (100, 29)):
                 with self.subTest(level=level):
-                    original = at_level(seed, level)
+                    original = at_level(starting_snapshot, level)
                     result = candidates(original)
                     self.assertEqual(len(result), count)
                     self.assertEqual(result, candidates(original))
@@ -111,11 +111,13 @@ class DatasetTests(unittest.TestCase):
                             original.to_dict(),
                         )
                         self.assertTrue(all(item.passives["selected"].values()))
-            value = seed.to_dict()
+            value = starting_snapshot.to_dict()
             value["passives"]["selected"] = {"49": 0, "2": 0}
-            zero_seed = BuildSnapshot.from_dict(value)
-            self.assertEqual(candidates(zero_seed)[0].passives["selected"], {})
-            self.assertEqual(len(candidates(zero_seed)), 19)
+            zero_starting_snapshot = BuildSnapshot.from_dict(value)
+            self.assertEqual(
+                candidates(zero_starting_snapshot)[0].passives["selected"], {}
+            )
+            self.assertEqual(len(candidates(zero_starting_snapshot)), 19)
 
     def test_complete_relocation_and_corruption_rejection(self):
         with tempfile.TemporaryDirectory() as temporary:
@@ -138,7 +140,9 @@ class DatasetTests(unittest.TestCase):
             shutil.rmtree(import_run)
             dataset = load(moved)
             self.assertEqual(len(dataset.candidates), 19)
-            self.assertEqual(dataset.seed.source_id, dataset.candidates[0].source_id)
+            self.assertEqual(
+                dataset.starting_snapshot.source_id, dataset.candidates[0].source_id
+            )
             self.assertEqual(
                 len(
                     {
@@ -158,8 +162,8 @@ class DatasetTests(unittest.TestCase):
                 finally:
                     path.write_bytes(old)
 
-            corrupt(moved / "seed/raw.json", b"{}", "raw response hash")
-            corrupt(moved / "seed/provenance.json", b"{}", "provenance")
+            corrupt(moved / "starting_snapshot/raw.json", b"{}", "raw response hash")
+            corrupt(moved / "starting_snapshot/provenance.json", b"{}", "provenance")
             corrupt(
                 moved / "candidates/000/calculator-output.json", b"bad", "file hash"
             )
@@ -208,7 +212,7 @@ class DatasetTests(unittest.TestCase):
                 change(value)
                 corrupt(manifest_path, canonical_bytes(value), diagnostic)
 
-    def test_invalid_seed_and_midrun_failure_never_publish_manifest(self):
+    def test_invalid_starting_snapshot_and_midrun_failure_never_publish_manifest(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             import_run = saved(root)

@@ -31,7 +31,7 @@ CONFIGURATION = {
 @dataclass(frozen=True)
 class Dataset:
     manifest: dict[str, Any]
-    seed: BuildSnapshot
+    starting_snapshot: BuildSnapshot
     candidates: list[BuildSnapshot]
 
 
@@ -53,7 +53,7 @@ def load(location: Path) -> Dataset:
         "snapshot_schema_version",
         "evaluation_schema_version",
         "game_version",
-        "seed",
+        "starting_snapshot",
         "generator",
         "evaluator",
         "candidate_count",
@@ -73,8 +73,10 @@ def load(location: Path) -> Dataset:
         or manifest["game_version"] != "1.4.7"
     ):
         raise ValueError("Dataset schema or game version is unsupported")
-    seed_record = manifest["seed"]
-    if not isinstance(seed_record, dict) or set(seed_record) != {
+    starting_snapshot_record = manifest["starting_snapshot"]
+    if not isinstance(starting_snapshot_record, dict) or set(
+        starting_snapshot_record
+    ) != {
         "path",
         "snapshot_sha256",
         "source_url",
@@ -82,28 +84,33 @@ def load(location: Path) -> Dataset:
         "raw_sha256",
         "provenance_sha256",
     }:
-        raise ValueError("Dataset seed record is invalid")
-    seed_path = _relative(seed_record["path"], "seed")
-    seed = load_import(location / seed_path)
-    validate_evaluation_source(
-        (location / seed_path / seed.raw_path).read_bytes(), seed
+        raise ValueError("Dataset starting snapshot record is invalid")
+    starting_snapshot_path = _relative(
+        starting_snapshot_record["path"], "starting_snapshot"
     )
-    supported(seed)
-    if seed_record != {
-        "path": "seed",
-        "snapshot_sha256": snapshot_hash(seed),
-        "source_url": seed.source_url,
-        "source_id": seed.source_id,
-        "raw_sha256": seed.raw_sha256,
+    starting_snapshot = load_import(location / starting_snapshot_path)
+    validate_evaluation_source(
+        (location / starting_snapshot_path / starting_snapshot.raw_path).read_bytes(),
+        starting_snapshot,
+    )
+    supported(starting_snapshot)
+    if starting_snapshot_record != {
+        "path": "starting_snapshot",
+        "snapshot_sha256": snapshot_hash(starting_snapshot),
+        "source_url": starting_snapshot.source_url,
+        "source_id": starting_snapshot.source_id,
+        "raw_sha256": starting_snapshot.raw_sha256,
         "provenance_sha256": (
-            sha256((location / seed_path / "provenance.json").read_bytes())
-            if (location / seed_path / "provenance.json").is_file()
+            sha256((location / starting_snapshot_path / "provenance.json").read_bytes())
+            if (location / starting_snapshot_path / "provenance.json").is_file()
             else None
         ),
     }:
-        raise ValueError("Dataset seed identity does not match retained import")
-    if seed.game_version != manifest["game_version"]:
-        raise ValueError("Dataset seed game version differs from manifest")
+        raise ValueError(
+            "Dataset starting snapshot identity does not match retained import"
+        )
+    if starting_snapshot.game_version != manifest["game_version"]:
+        raise ValueError("Dataset starting snapshot game version differs from manifest")
     if manifest["generator"] != {
         "name": "sentinel_passive_space",
         "version": GENERATOR_VERSION,
@@ -137,7 +144,7 @@ def load(location: Path) -> Dataset:
     ) or not 0 <= manifest["measured_calculator_seconds"] < float("inf"):
         raise ValueError("Dataset measured calculator time is invalid")
     records = manifest["candidates"]
-    expected = candidates(seed)
+    expected = candidates(starting_snapshot)
     if (
         type(manifest["candidate_count"]) is not int
         or manifest["candidate_count"] != len(expected)
@@ -188,9 +195,14 @@ def load(location: Path) -> Dataset:
             evaluation.source_id,
             evaluation.raw_sha256,
             evaluation.game_version,
-        ) != (seed.source_url, seed.source_id, seed.raw_sha256, seed.game_version):
+        ) != (
+            starting_snapshot.source_url,
+            starting_snapshot.source_id,
+            starting_snapshot.raw_sha256,
+            starting_snapshot.game_version,
+        ):
             raise ValueError(
-                f"Candidate {index} source or game version differs from seed"
+                f"Candidate {index} source or game version differs from starting snapshot"
             )
         if {
             "name": evaluation.evaluator,
@@ -202,4 +214,4 @@ def load(location: Path) -> Dataset:
         } != evaluator:
             raise ValueError(f"Candidate {index} evaluator configuration differs")
         loaded.append(snapshot)
-    return Dataset(manifest, seed, loaded)
+    return Dataset(manifest, starting_snapshot, loaded)
