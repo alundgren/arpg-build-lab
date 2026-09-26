@@ -5,6 +5,13 @@ including issues, labels, pull requests, and checks. Keep repository targets
 explicit outside the checkout. For multiline issue or PR text, pass a file with
 `--body-file`.
 
+Use the [project names and ownership](architecture.md#names-and-responsibilities)
+in issues as well as PRs. A reader should be able to trace a named responsibility
+from the request through its diagram to the owning module. Use the same terms
+for the same behavior and mark proposed components as future work. Update active
+work descriptions when an agreed rename changes their meaning; historical
+discussions can retain their original terms with a link to the current decision.
+
 ## Commits and PR titles
 
 Use [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)
@@ -44,6 +51,14 @@ importer instead of introducing an unexplained "LETools adapter" box. Confirm
 that arrows match real data flow or dependencies, and label future components.
 If a diagram cannot be mapped to the code, investigate whether documentation
 has drifted or the code's responsibilities are unclear before changing labels.
+
+During review, check changed file and folder names, public types and functions,
+persisted fields, and diagram labels against the same vocabulary and ownership.
+Report concrete cases where one concept has competing names, or one name hides
+different responsibilities. Verify renames include callers and current docs,
+and account for compatibility of saved formats and public commands. This is a
+semantic review; do not add tests that freeze the current file list or private
+helper names.
 
 Make the evidence specific enough for a reviewer to check:
 

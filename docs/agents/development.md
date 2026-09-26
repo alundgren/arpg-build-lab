@@ -105,7 +105,8 @@ out of Git. These rules also apply to documentation examples.
 Check the license before copying upstream code or substantial data. MIT covers
 our repository work; it does not relicense Last Epoch assets or third-party
 material. Record source, permission/license, and any required attribution for
-redistributed examples. Prefer permissive dependencies and external adapters.
+redistributed examples. Prefer permissive dependencies and keep calculator
+integration in the evaluator that uses it.
 
 ## Documentation and search
 

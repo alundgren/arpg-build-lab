@@ -1,7 +1,7 @@
 # Build importers
 
 Own input recognition, external payload validation, and translation into the
-canonical domain model. External field names and source quirks stay here.
+domain's `BuildSnapshot`. External field names and source quirks stay here.
 
 LETools planner URLs are the first source. Verify current endpoint behavior
 and usage expectations before implementation. Do not bypass authentication,

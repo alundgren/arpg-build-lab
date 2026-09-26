@@ -24,7 +24,7 @@ explain, reconsider the code organization before adding more instructions.
 
 ## Read documents on demand
 
-- Changing module boundaries or persisted data: read
+- Choosing or changing names, module boundaries, or persisted data: read
   `docs/agents/architecture.md`.
 - Setting up tools, portability, artifact storage, or testing and validation: read
   `docs/agents/development.md`.
@@ -60,7 +60,15 @@ work. Include a diagram when it helps the reader understand or assess the change
 simple changes may need only a sentence. For implemented components, use actual
 code names or pair a readable role with its module path. Mark future work clearly.
 
-Own a small, versioned canonical model. Keep external formats in adapters.
+Make issues, PRs, docs, diagrams, the folder tree, and code describe the same
+system for humans and agents. Use one name for each concept and responsibility,
+following `docs/agents/architecture.md`. Match ownership and behavior as well as
+words. Name code after the Last Epoch concepts it models or the work it does.
+New architectural layers need a concrete project problem; do not introduce
+them or their terminology merely to follow a named pattern.
+
+Own a small, versioned build model. Importers own external build formats;
+evaluators own calculator integration and normalized results.
 Retain the game version and relevant provenance in every persisted build,
 evaluation, and dataset. Represent missing information honestly.
 
@@ -70,7 +78,8 @@ are reference results that can be wrong.
 
 Write all application code we own in Python. Introduce another language only
 when a concrete problem in our application justifies it. External tools and
-libraries may use any language or runtime; keep tool integrations behind adapters.
+libraries may use any language or runtime. Keep code specific to a build source
+or calculator in the corresponding importer or evaluator.
 
 Keep development and small CPU checks portable across Linux and macOS. Larger
 training may use the Mac GPU. Keep versioned files for reproducible artifacts;

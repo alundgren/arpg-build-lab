@@ -1,13 +1,13 @@
-# Calculator adapters
+# Build evaluators
 
-Own conversion from our canonical build to a calculator's input, execution of
-that calculator, and normalization into our evaluation contract. Domain types
+Own conversion from `BuildSnapshot` to a calculator's input, execution of
+that calculator, and normalization into `BuildEvaluation`. Domain types
 stay independent of calculator-specific concepts.
 
 Before choosing an integration, check the upstream license, supported game
-versions, and headless execution path. Prefer an external executable or adapter
-over copying implementation. Last Epoch Building and The Forge are candidates,
-not current dependencies.
+versions, and headless execution path. Keep the integration in an evaluator
+module and prefer calling the external tool over copying its implementation.
+Last Epoch Building and The Forge are candidates, not current dependencies.
 
 Record evaluator identity/version and game version with results. Retain raw
 output in ignored artifacts for investigation. Expose unsupported calculations

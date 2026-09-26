@@ -14,8 +14,10 @@ arrows against the code and mark future work. Keep detailed checks in Evidence. 
 
 <!-- Connect the requested outcome to observed results. Include source links
 showing how the change follows architectural guidance and note any justified
-exceptions. Record the behavior checked, test level, commands, actual results,
-and relevant limits. Prefer E2E, then integration/component, then pure unit
+exceptions. Check that issue, file, folder, type, function, and diagram names use
+the same project vocabulary and reflect actual ownership. Record the behavior
+checked, test level, commands, actual results, and relevant limits. Prefer E2E,
+then integration/component, then pure unit
 tests. Test desired behavior; coverage percentages are not the goal.
 
 Prefer ASCII diagrams for algorithms, processes, and data flow. Add relevant
