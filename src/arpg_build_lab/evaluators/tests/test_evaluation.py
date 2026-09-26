@@ -70,6 +70,13 @@ class EvaluationTests(unittest.TestCase):
             snapshot = load_import(location)
             raw = json.loads((location / "raw.json").read_text())
             validate_evaluation_source((location / "raw.json").read_bytes(), snapshot)
+            changed_snapshot = snapshot.to_dict()
+            changed_snapshot["character"]["source_fields"]["chosenMastery"] = False
+            with self.assertRaisesRegex(ValueError, "chosenMastery.*integers"):
+                validate_evaluation_source(
+                    (location / "raw.json").read_bytes(),
+                    BuildSnapshot.from_dict(changed_snapshot),
+                )
             for key, value in (
                 ("completedQuests", [1]),
                 ("skillTrees", [{"treeID": "x"}]),
@@ -78,7 +85,7 @@ class EvaluationTests(unittest.TestCase):
                 changed["data"][key] = value
                 with (
                     self.subTest(key=key),
-                    self.assertRaisesRegex(ValueError, "Raw data"),
+                    self.assertRaisesRegex(ValueError, f"data.{key}"),
                 ):
                     validate_evaluation_source(json.dumps(changed).encode(), snapshot)
             raw["data"]["charTree"]["extra"] = True
@@ -117,6 +124,12 @@ class EvaluationTests(unittest.TestCase):
                 (lambda v: v["unresolved"]["item_ids"].append("x"), "unresolved"),
                 (
                     lambda v: v["character"]["source_fields"].update(extra=1),
+                    "source_fields",
+                ),
+                (
+                    lambda v: v["character"]["source_fields"].update(
+                        chosenMastery=False
+                    ),
                     "source_fields",
                 ),
             ]
@@ -187,6 +200,10 @@ class EvaluationTests(unittest.TestCase):
                 canonical_bytes(evaluation.to_dict())
             )
             self.assertEqual(load(location), evaluation)
+            malformed = evaluation.to_dict()
+            malformed["metrics"]["health"]["value"] = 10**400
+            with self.assertRaisesRegex(ValueError, "Invalid health value"):
+                BuildEvaluation.from_dict(malformed)
             (location / "calculator-output.json").write_bytes(b'{"Life":0}')
             with self.assertRaisesRegex(ValueError, "hash mismatch"):
                 load(location)

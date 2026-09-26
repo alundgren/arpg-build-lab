@@ -94,11 +94,15 @@ class BuildEvaluation:
             ):
                 raise ValueError(f"Invalid {name} unit")
             number = metric["value"]
-            if (
-                type(number) not in (int, float)
-                or not math.isfinite(number)
-                or number < 0
-            ):
+            try:
+                valid = (
+                    type(number) in (int, float)
+                    and math.isfinite(number)
+                    and number >= 0
+                )
+            except OverflowError:
+                valid = False
+            if not valid:
                 raise ValueError(f"Invalid {name} value")
         if not isinstance(value["files"], dict) or set(value["files"]) != {
             "snapshot.json",

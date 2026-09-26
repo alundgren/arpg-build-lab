@@ -144,9 +144,22 @@ def verify_saved_versions(snapshot: BuildSnapshot, raw: bytes) -> None:
 
 def validate_evaluation_source(raw: bytes, snapshot: BuildSnapshot) -> None:
     """Reject raw LETools content outside the supported calculator input."""
+
+    def limited_fields(value: dict[str, Any], expected: set[str], path: str) -> None:
+        extra = sorted(set(value) - expected)
+        missing = sorted(expected - set(value))
+        limit = ", ".join(sorted(expected))
+        if extra:
+            raise ValueError(
+                f"Raw {path}.{extra[0]} is unsupported; supported fields: {limit}"
+            )
+        if missing:
+            raise ValueError(
+                f"Raw {path}.{missing[0]} is missing; required fields: {limit}"
+            )
+
     payload = _record(json.loads(raw, parse_constant=_json_constant), "response")
-    if set(payload) != {"created_for_build", "data_version", "data"}:
-        raise ValueError("Raw response supports only version fields and data")
+    limited_fields(payload, {"created_for_build", "data_version", "data"}, "response")
     data = _record(payload["data"], "data")
     supported_fields = {
         "dataVersion",
@@ -157,15 +170,22 @@ def validate_evaluation_source(raw: bytes, snapshot: BuildSnapshot) -> None:
         "idols",
         "blessings",
     }
-    if set(data) != supported_fields:
-        raise ValueError("Raw data has missing or unsupported source sections")
+    limited_fields(data, supported_fields, "data")
     bio = _record(data["bio"], "data.bio")
+    for key in ("characterClass", "chosenMastery", "level"):
+        if (
+            type(bio.get(key)) is not int
+            or type(snapshot.character["source_fields"].get(key)) is not int
+        ):
+            raise ValueError(
+                f"Raw data.bio.{key} and snapshot character.source_fields.{key} must be integers"
+            )
     if bio != snapshot.character["source_fields"]:
         raise ValueError("Raw data.bio differs from snapshot character")
     tree = _record(data["charTree"], "data.charTree")
+    limited_fields(tree, {"treeID", "selected", "version"}, "data.charTree")
     if (
-        set(tree) != {"treeID", "selected", "version"}
-        or tree["treeID"] != snapshot.passives["source_tree_id"]
+        tree["treeID"] != snapshot.passives["source_tree_id"]
         or tree["version"] != snapshot.passives["source_version"]
         or not isinstance(tree["selected"], dict)
     ):

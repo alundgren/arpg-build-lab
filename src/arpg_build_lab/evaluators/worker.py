@@ -18,7 +18,11 @@ def metrics_from_output(output: dict) -> dict[str, dict]:
         ("armour", "Armour", "armour rating"),
     ):
         value = output["metrics"].get(source)
-        if type(value) not in (int, float) or not math.isfinite(value) or value < 0:
+        try:
+            valid = type(value) in (int, float) and math.isfinite(value) and value >= 0
+        except OverflowError:
+            valid = False
+        if not valid:
             raise ValueError(f"LEB {source} must be a nonnegative finite number")
         result[name] = {"value": value, "unit": unit}
     return result

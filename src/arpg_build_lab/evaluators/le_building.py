@@ -51,7 +51,11 @@ def supported(snapshot: BuildSnapshot) -> dict[str, int]:
     level = character["level"]
     if type(level) is not int or not 1 <= level <= 100:
         raise ValueError("character.level must be an integer from 1 to 100")
-    if character["source_fields"] != {
+    source_fields = character["source_fields"]
+    if any(
+        type(source_fields.get(key)) is not int
+        for key in ("characterClass", "chosenMastery", "level")
+    ) or source_fields != {
         "characterClass": 2,
         "chosenMastery": 0,
         "level": level,
@@ -71,9 +75,10 @@ def supported(snapshot: BuildSnapshot) -> dict[str, int]:
             "passives supports only the LETools Sentinel class tree without extra fields"
         )
     selected = tree["selected"]
-    if set(selected) - {"49", "2"}:
+    unsupported = sorted(set(selected) - {"49", "2"})
+    if unsupported:
         raise ValueError(
-            "passives.selected supports only Fearless 49 and Armour Clad 2"
+            f"passives.selected.{unsupported[0]} is unsupported; only Fearless 49 and Armour Clad 2 are supported"
         )
     for key, maximum in (("49", 8), ("2", 5)):
         points = selected.get(key, 0)
@@ -89,7 +94,12 @@ def supported(snapshot: BuildSnapshot) -> dict[str, int]:
         )
     for name in ("skills", "equipment", "idols", "blessings", "unsupported_sections"):
         if getattr(snapshot, name):
-            raise ValueError(f"{name} must be empty for supported evaluation")
+            detail = (
+                f" ({snapshot.unsupported_sections[0]})"
+                if name == "unsupported_sections"
+                else ""
+            )
+            raise ValueError(f"{name}{detail} must be empty for supported evaluation")
     if any(snapshot.unresolved.values()):
         raise ValueError("unresolved IDs must be empty for supported evaluation")
     return {key: count for key, count in selected.items() if count}
