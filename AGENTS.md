@@ -16,6 +16,7 @@ instruction or documentation collection.
 - `src/arpg_build_lab/importers/` translates external builds into that representation.
 - `src/arpg_build_lab/evaluators/` will run calculators and record build evaluation results.
 - `ml/` owns feature preparation, training, and measured experiments.
+- `scripts/` owns development checks and their output.
 
 Add a local `AGENTS.md` when a directory has distinct responsibilities or rules.
 Write only what differs from its parents: ownership, allowed dependencies,
@@ -82,6 +83,11 @@ they must not contain work-item references or task-completion narratives. Use
 clear names and straightforward code. Put design explanations in the owning
 module's documentation. Use Ruff for Python linting and formatting, following
 the development guide.
+
+Run routine validation with `python3 scripts/check.py`. Keep success output brief
+and show useful failure diagnostics. Preserve failed exit codes; complexity
+advisories remain the explicitly non-blocking exception. See the development
+guide for the individual commands when investigating a failure.
 
 Own a small, versioned build representation, `BuildSnapshot`. Importers own
 external build formats; build evaluators own calculator integration and results.

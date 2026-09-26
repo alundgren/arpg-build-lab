@@ -162,6 +162,7 @@ the actual calls, dependencies, or data flow described by the diagram.
 | `src/arpg_build_lab/importers/` | Parse external builds into `BuildSnapshot` | Domain |
 | `src/arpg_build_lab/evaluators/` | Future calculator integration | Domain and chosen calculator integration |
 | `ml/` | Future feature preparation, training, and error measurement | Domain and versioned datasets |
+| `scripts/` | Development checks and their output | Python standard library and locked development tools |
 
 The current command, persistence, reload, and summary functions live in
 `importers/cli.py`. Add generation, mutation, search, and further orchestration

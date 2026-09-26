@@ -14,10 +14,5 @@ jobs:
         with:
           python-version-file: .python-version
       - uses: astral-sh/setup-uv@v6
-      - run: uv sync --locked
-      - run: uv run --locked ruff check .
-      - run: uv run --locked ruff format --check .
-      - name: Complexity advisories
-        run: uv run --locked ruff check --select C901,PLR0912,PLR0915 --exit-zero .
-      - run: uv run --locked python -m unittest discover -s src/arpg_build_lab/importers/tests
-      - run: uv build
+      - name: Repository checks
+        run: python scripts/check.py
