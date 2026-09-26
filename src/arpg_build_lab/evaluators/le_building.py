@@ -16,6 +16,7 @@ from arpg_build_lab.domain.evaluation import (
     load,
     sha256,
 )
+from arpg_build_lab.domain.passives import validate as validate_passives
 from arpg_build_lab.domain.snapshot import BuildSnapshot
 
 REVISION = "a97d388aca0da00907afb9d5a945c8f254a67b18"
@@ -75,23 +76,7 @@ def supported(snapshot: BuildSnapshot) -> dict[str, int]:
             "passives supports only the LETools Sentinel class tree without extra fields"
         )
     selected = tree["selected"]
-    unsupported = sorted(set(selected) - {"49", "2"})
-    if unsupported:
-        raise ValueError(
-            f"passives.selected.{unsupported[0]} is unsupported; only Fearless 49 and Armour Clad 2 are supported"
-        )
-    for key, maximum in (("49", 8), ("2", 5)):
-        points = selected.get(key, 0)
-        if type(points) is not int or not 0 <= points <= maximum:
-            raise ValueError(
-                f"passives.selected.{key} must be an integer from 0 to {maximum}"
-            )
-    if selected.get("2", 0) and selected.get("49", 0) < 5:
-        raise ValueError("Armour Clad 2 requires at least five Fearless 49 points")
-    if sum(selected.values()) > level - 1:
-        raise ValueError(
-            "passives.selected exceeds the conservative level - 1 point budget"
-        )
+    normalized = validate_passives(selected, level)
     for name in ("skills", "equipment", "idols", "blessings", "unsupported_sections"):
         if getattr(snapshot, name):
             detail = (
@@ -102,7 +87,7 @@ def supported(snapshot: BuildSnapshot) -> dict[str, int]:
             raise ValueError(f"{name}{detail} must be empty for supported evaluation")
     if any(snapshot.unresolved.values()):
         raise ValueError("unresolved IDs must be empty for supported evaluation")
-    return {key: count for key, count in selected.items() if count}
+    return normalized
 
 
 def calculator_xml(level: int, selected: dict[str, int]) -> str:

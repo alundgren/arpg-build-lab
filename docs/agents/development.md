@@ -84,6 +84,14 @@ examples. `python3 scripts/check.py` remains offline. The explicit engine check
 is `uv run --locked --extra calculator python scripts/check_real_engine.py --leb-checkout <checkout>`;
 CI runs it on Linux and macOS.
 
+To generate every supported passive allocation for one saved import, run
+`uv run --locked --extra calculator arpg-dataset artifacts/1.4.7/imports/<run-id> --leb-checkout <checkout>`.
+The command writes an ignored dataset under `artifacts/1.4.7/datasets/` and
+prints the calculator reference ranges, candidate count, and measured time.
+Its [contract and offline synthetic example](../../src/arpg_build_lab/datasets/README.md)
+describe retained files and validated reload. Nearby mutations of one seed
+do not show generalization to untouched or complete builds.
+
 Keep application code in Python until a concrete problem justifies another
 language. External tools and libraries may use other runtimes. Document any
 runtime needed by an integration when it is introduced.
