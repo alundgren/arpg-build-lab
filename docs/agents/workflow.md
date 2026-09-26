@@ -31,6 +31,20 @@ two parts:
    attribute so it is collapsed by default. Leave blank lines around Markdown
    inside the block. Keep review records and agent attribution here too.
 
+Put a small ASCII diagram in the visible Summary when it helps a human
+understand the outcome, follow a workflow, or assess an important relationship
+or trade-off. For example, showing how a requested build becomes a saved input
+can make an import change easier to review. A straightforward wording or bug
+fix may need only a sentence. Diagrams are useful when they answer a review
+question; they are not required decoration. Keep detailed checks in Evidence.
+
+Use the same component names as the code, or pair a readable role with its
+actual module path. For example, label `importers/letools.py` as the LETools
+importer instead of introducing an unexplained "LETools adapter" box. Confirm
+that arrows match real data flow or dependencies, and label future components.
+If a diagram cannot be mapped to the code, investigate whether documentation
+has drifted or the code's responsibilities are unclear before changing labels.
+
 Make the evidence specific enough for a reviewer to check:
 
 - Connect the requested outcome and acceptance criteria to observed results.

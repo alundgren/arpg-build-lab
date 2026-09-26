@@ -55,7 +55,10 @@ training examples through local mutations and evaluation of saved builds.
 
 Prefer ASCII diagrams over prose when explaining algorithms, processes, and
 data flow. Add short prose for context and details the diagram cannot show.
-Apply this to documentation, PR evidence, and explanations during work.
+Apply this to documentation, PR summaries and evidence, and explanations during
+work. Include a diagram when it helps the reader understand or assess the change;
+simple changes may need only a sentence. For implemented components, use actual
+code names or pair a readable role with its module path. Mark future work clearly.
 
 Own a small, versioned canonical model. Keep external formats in adapters.
 Retain the game version and relevant provenance in every persisted build,

@@ -2,7 +2,12 @@
 
 <!-- Explain the intended outcome and why a human should care. What problem
 goes away, or what can someone now do? Keep material limitations visible.
-Link the requested work, using Closes #N when appropriate. -->
+Link the requested work, using Closes #N when appropriate.
+
+Include a small ASCII diagram here when it clarifies the outcome, workflow, or
+an important relationship or trade-off. Skip it when a sentence is enough.
+Use actual code names or pair readable roles with module paths. Check the
+arrows against the code and mark future work. Keep detailed checks in Evidence. -->
 
 <details>
 <summary>Evidence</summary>
