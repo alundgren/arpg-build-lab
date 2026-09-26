@@ -1,6 +1,6 @@
-# TypeScript components
+# Application components
 
-This directory reserves ownership areas; runnable TypeScript code and tooling
+This directory reserves ownership areas; runnable Python code and tooling
 will arrive with the first importer.
 
 Keep dependencies directed toward `domain/`. The domain does not import source

@@ -49,8 +49,12 @@ Make ML behavior measurable. Compare useful baselines, inspect failures, and
 explain unfamiliar concepts using actual project examples. Evaluator outputs
 are reference results that can be wrong.
 
+Write all application code we own in Python. Introduce another language only
+when a concrete problem in our application justifies it. External tools and
+libraries may use any language or runtime; keep tool integrations behind adapters.
+
 Keep development and small CPU checks portable across Linux and macOS. Larger
-training may use the Mac GPU. Start with files between TypeScript and Python;
+training may use the Mac GPU. Keep versioned files for reproducible artifacts;
 add processes or services only for a demonstrated need.
 
 Check licenses before copying code or substantial data. Prefer permissive
