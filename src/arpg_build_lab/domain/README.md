@@ -27,3 +27,17 @@ response is always available at the relative `raw_path`, guarded by `raw_sha256`
 `load()` also verifies the colocated raw response hash. A future schema change
 must define how existing records are read or migrated before changing this
 format.
+
+# BuildEvaluation schema 1
+
+`evaluation.json` records a calculator reference result and its exact evaluated
+`BuildSnapshot` identity. It includes source URL and ID, original raw SHA-256,
+snapshot schema and game version, evaluator identity and version, calculator
+revision, application version and game-data selection, runtime, configuration,
+and health and armour with units. A measured zero is a number; a missing metric
+is invalid. `snapshot_sha256` hashes the entire snapshot as UTF-8 JSON with
+sorted keys, compact separators, no ASCII escaping and no nonfinite numbers.
+It changes when canonical passive allocations change even if the source raw
+hash stays the same. `files` hashes every retained input, original calculator
+output and diagnostic file. `domain.evaluation.load()` checks these links and
+the source identity. The domain contract does not depend on calculator APIs.

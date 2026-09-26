@@ -38,6 +38,21 @@ def main() -> int:
                 "--buffer",
             ],
         ),
+        (
+            "evaluator tests",
+            [
+                *run,
+                "python",
+                "-m",
+                "unittest",
+                "discover",
+                "-s",
+                "src/arpg_build_lab/evaluators/tests",
+                "--buffer",
+                "-p",
+                "test_evaluation.py",
+            ],
+        ),
         ("build", ["uv", "build"]),
     ]
     for name, command in checks:

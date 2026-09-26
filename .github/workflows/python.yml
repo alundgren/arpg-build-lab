@@ -16,3 +16,12 @@ jobs:
       - uses: astral-sh/setup-uv@v6
       - name: Repository checks
         run: python scripts/check.py
+      - name: Fetch pinned Last Epoch Building calculator
+        run: |
+          git clone --filter=blob:none --sparse https://github.com/uta666XYZ/LastEpochBuilding.git "$RUNNER_TEMP/last-epoch-building"
+          git -C "$RUNNER_TEMP/last-epoch-building" checkout a97d388aca0da00907afb9d5a945c8f254a67b18
+          git -C "$RUNNER_TEMP/last-epoch-building" sparse-checkout set src runtime
+      - name: Real calculator examples
+        run: |
+          uv sync --locked --extra calculator
+          uv run --locked --extra calculator python scripts/check_real_engine.py --leb-checkout "$RUNNER_TEMP/last-epoch-building"

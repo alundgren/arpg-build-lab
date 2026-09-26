@@ -10,7 +10,12 @@ from pathlib import Path
 from uuid import uuid4
 
 from arpg_build_lab.domain.snapshot import BuildSnapshot
-from arpg_build_lab.importers.letools import ImportError, fetch, parse_build
+from arpg_build_lab.importers.letools import (
+    ImportError,
+    fetch,
+    parse_build,
+    verify_saved_versions,
+)
 
 
 def _invalid_constant(value: str) -> None:
@@ -65,6 +70,24 @@ def load(location: Path) -> BuildSnapshot:
     raw = (location / raw_path).read_bytes()
     if hashlib.sha256(raw).hexdigest() != snapshot.raw_sha256:
         raise ValueError("Snapshot raw response hash does not match")
+    verify_saved_versions(snapshot, raw)
+    provenance_path = location / "provenance.json"
+    if provenance_path.exists():
+        provenance = json.loads(
+            provenance_path.read_text(), parse_constant=_invalid_constant
+        )
+        if not isinstance(provenance, dict):
+            raise ValueError("Import provenance must be an object")
+        for key, expected in {
+            "source_url": snapshot.source_url,
+            "raw_sha256": snapshot.raw_sha256,
+            "schema_version": snapshot.schema_version,
+            "game_version": snapshot.game_version,
+            "importer_version": snapshot.importer_version,
+            "lookup_revision": snapshot.lookup_revision,
+        }.items():
+            if provenance.get(key) != expected:
+                raise ValueError(f"Import provenance {key} does not match snapshot")
     return snapshot
 
 

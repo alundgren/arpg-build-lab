@@ -72,6 +72,15 @@ Each import writes `raw.json`, `snapshot.json`, and `provenance.json` to a new
 run directory under `artifacts/<version>/imports/`. The command prints the path.
 An unknown or conflicting game version goes under `artifacts/unknown/`.
 
+For the supported 1.4.7 Sentinel subset, install the optional calculator runtime
+with `uv sync --locked --extra calculator`. Supply a local checkout of Last Epoch
+Building at revision `a97d388aca0da00907afb9d5a945c8f254a67b18` to
+`arpg-evaluate artifacts/1.4.7/imports/<run-id> --leb-checkout <checkout>`.
+See `src/arpg_build_lab/evaluators/README.md` for supported input and synthetic
+examples. `python3 scripts/check.py` remains offline. The explicit engine check
+is `uv run --locked --extra calculator python scripts/check_real_engine.py --leb-checkout <checkout>`;
+CI runs it on Linux and macOS.
+
 Keep application code in Python until a concrete problem justifies another
 language. External tools and libraries may use other runtimes. Document any
 runtime needed by an integration when it is introduced.
