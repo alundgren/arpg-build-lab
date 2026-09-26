@@ -7,7 +7,7 @@ stay independent of calculator-specific concepts.
 Before choosing an integration, check the upstream license, supported game
 versions, and headless execution path. Prefer an external executable or adapter
 over copying implementation. Last Epoch Building and The Forge are candidates,
-not dependencies selected by this scaffold.
+not current dependencies.
 
 Record evaluator identity/version and game version with results. Retain raw
 output in ignored artifacts for investigation. Expose unsupported calculations

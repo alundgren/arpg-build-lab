@@ -1,7 +1,7 @@
 # Architecture direction
 
-This is a repository scaffold. The folders below reserve responsibilities;
-the contracts, importer, evaluators, datasets, and models are not implemented.
+The LETools importer produces a versioned `BuildSnapshot`. Evaluators, datasets,
+and models remain future work.
 
 ## Two goals
 
@@ -34,9 +34,9 @@ LETools import path.
 
 | Directory | Responsibility | Dependencies |
 | --- | --- | --- |
-| `src/domain/` | Canonical build, validity rules, normalized evaluation | No adapter or ML dependencies |
-| `src/importers/` | Recognize and normalize external builds | Domain |
-| `src/evaluators/` | Run calculators and normalize results | Domain and chosen calculator integration |
+| `src/arpg_build_lab/domain/` | Canonical build snapshot | No adapter or ML dependencies |
+| `src/arpg_build_lab/importers/` | Recognize and normalize external builds | Domain |
+| `src/arpg_build_lab/evaluators/` | Future calculator integration | Domain and chosen calculator integration |
 | `ml/` | Prepare features, train models, measure errors | Domain and versioned datasets |
 
 A future command or UI coordinates these components. Add generation, mutation,
@@ -45,10 +45,10 @@ contracts their callers need and keep internal representations local.
 
 ## Data that we own
 
-Define the smallest useful Last Epoch `BuildSnapshot` after inspecting a real
-import. The handoff in the epic is a design sketch, not an accepted schema.
-It identifies character, passives, skills, equipment, idols, blessings, game
-version, and source provenance as likely contents.
+`BuildSnapshot` schema 1 retains character, passives, skills, equipment, idols,
+blessings, game-version evidence, source provenance, and diagnostics. The
+imported raw response sits beside each snapshot and is checked by SHA-256 on
+reload. Domain types are independent of the importer package.
 
 Keep schema version, game version, source version, and evaluator version
 separate. Use stable game IDs when available. Never silently combine game

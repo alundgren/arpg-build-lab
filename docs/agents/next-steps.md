@@ -1,7 +1,7 @@
 # Continue the project
 
-The repository contains the agreed documentation and folder scaffold. There is
-no runnable application, dependency installation, or test suite yet.
+The repository has a runnable LETools importer, a versioned `BuildSnapshot`,
+offline tests, and Linux/macOS CI. Setup and command use are in `development.md`.
 
 The full remaining handoff lives in
 [epic #1: Explore and optimize Last Epoch builds while learning traditional ML](https://github.com/alundgren/arpg-build-lab/issues/1).
@@ -10,16 +10,11 @@ component work should use the relevant local instructions and contracts.
 
 ## Next useful outcome
 
-Refine the smallest import task when implementation resumes. Its intended
-result is importing
-`https://www.lastepochtools.com/planner/AL0rXWDz`, writing a canonical
-`BuildSnapshot`, and printing a concise human-readable summary. The command
-name in the epic is illustrative until tooling exists.
-
-Start in `src/importers/` to verify the actual endpoint, payload, and usage
-expectations. Define the minimum evidence-backed representation in
-`src/domain/`, including how missing version information is handled. Introduce
-the Python tooling and meaningful Linux/macOS checks with this work.
+The import path is implemented under `src/arpg_build_lab/importers/`; the
+snapshot contract is under `src/arpg_build_lab/domain/`. The next task should
+come from the epic after this importer is reviewed and merged. The current
+snapshot has source IDs and unresolved translations, so calculator work must
+check compatibility before treating it as an evaluation input.
 
 Use synthetic or permission-checked fixtures for automated checks. Live network
 access must not be required for the default tests. Leave evaluator integration,

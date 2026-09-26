@@ -2,15 +2,17 @@
 
 ## Current setup
 
-This scaffold contains documentation and ownership directories. There are no
-runtime dependencies, package manifests, executable commands, tests, or CI yet.
-Introduce those with the first runnable importer. Do not add placeholder code
-just to give a check something to run.
+Install Python 3.12 or newer and uv. Run `uv sync --locked` from the repository
+root, then `uv run --locked python -m unittest discover -s src/arpg_build_lab/importers/tests`.
+The runtime uses the Python standard library; `uv.lock` records the project environment.
 
-Introduce Python tooling with the first runnable importer. Select the supported
-Python version and dependency manager then, and pin dependencies with a
-lockfile. Add ML dependencies with the first experiment; ordinary domain and
-importer development must not require them.
+Request one identified LETools planner build with
+`uv run --locked arpg-import https://www.lastepochtools.com/planner/<id>`.
+To replay a previously saved response without network access, add
+`--raw-file artifacts/<version>/imports/<run-id>/raw.json` to that command.
+Each import writes `raw.json`, `snapshot.json`, and `provenance.json` to a new
+run directory under `artifacts/<version>/imports/`. The command prints the path.
+An unknown or conflicting game version goes under `artifacts/unknown/`.
 
 Keep application code in Python until a concrete problem justifies another
 language. External tools and libraries may use other runtimes. Document any

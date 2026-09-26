@@ -12,9 +12,9 @@ Read the instructions on the path to the files you will change, including local
 expand only to the contracts or callers needed for the task. Avoid recursive
 instruction or documentation collection.
 
-- `src/domain/` owns our canonical build representation and validity rules.
-- `src/importers/` translates external builds into that representation.
-- `src/evaluators/` adapts calculators and normalizes their results.
+- `src/arpg_build_lab/domain/` owns our canonical build representation and validity rules.
+- `src/arpg_build_lab/importers/` translates external builds into that representation.
+- `src/arpg_build_lab/evaluators/` will adapt calculators and normalize their results.
 - `ml/` owns feature preparation, training, and measured experiments.
 
 Add a local `AGENTS.md` when a directory has distinct responsibilities or rules.
@@ -38,6 +38,17 @@ explain, reconsider the code organization before adding more instructions.
 content searches; `.ignore` does this for ripgrep. Read it only when the task
 explicitly involves that material. These are context conventions, not access
 controls. Current implementation must not depend on hidden journal knowledge.
+
+## LETools access
+
+Download individual LETools builds only on direct user request. The user must
+identify the build or planner URL. An agent or Python script may make the HTTP
+requests for that import, including using a browser-compatible User-Agent.
+Fetch only the requested build and the specific metadata needed to import it.
+
+Do not crawl or scrape LETools for collections, enumerate planner IDs, or
+bulk-download builds or game data. Cache requested builds locally. Generate ML
+training examples through local mutations and evaluation of saved builds.
 
 ## Project principles
 

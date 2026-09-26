@@ -1,9 +1,8 @@
 # Application components
 
-This directory reserves ownership areas; runnable Python code and tooling
-will arrive with the first importer.
+The `arpg_build_lab/` package contains the application and its ownership areas.
 
-Keep dependencies directed toward `domain/`. The domain does not import source
+Keep dependencies directed toward `arpg_build_lab/domain/`. The domain does not import source
 adapters, calculator adapters, ML code, or a future command/UI layer. Sibling
 adapters communicate through the canonical representation rather than each
 other's internals.
