@@ -2,15 +2,13 @@
 name = "arpg-build-lab"
 version = "0.1.0"
 description = "Inspect Last Epoch planner builds"
-requires-python = ">=3.12"
+license-files = ["LICENSE", "THIRD_PARTY_NOTICES.md"]
+requires-python = ">=3.14"
 dependencies = []
 
 [project.scripts]
 arpg-import = "arpg_build_lab.importers.cli:main"
 
 [build-system]
-requires = ["hatchling>=1.27,<2"]
-build-backend = "hatchling.build"
-
-[tool.hatch.build.targets.wheel]
-packages = ["src/arpg_build_lab"]
+requires = ["uv_build>=0.12.19,<0.13"]
+build-backend = "uv_build"

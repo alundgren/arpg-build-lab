@@ -2,9 +2,21 @@
 
 ## Current setup
 
-Install Python 3.12 or newer and uv. Run `uv sync --locked` from the repository
-root, then `uv run --locked python -m unittest discover -s src/arpg_build_lab/importers/tests`.
-The runtime uses the Python standard library; `uv.lock` records the project environment.
+Install [uv](https://docs.astral.sh/uv/getting-started/installation/), then run
+`uv python install` and `uv sync --locked` from the repository root.
+The committed `.python-version` selects Python 3.14 for development and CI;
+`requires-python` sets 3.14 as the minimum supported version.
+Run the offline checks with
+`uv run --locked python -m unittest discover -s src/arpg_build_lab/importers/tests`.
+
+The runtime uses the Python standard library; `uv.lock` records the project
+environment. `uv build` creates the source distribution and wheel using
+[`uv_build`](https://docs.astral.sh/uv/concepts/build-backend/), which fits our
+pure Python package and standard `src/` layout. The build requirement includes
+an upper version bound following uv's guidance. Python 3.14 was the stable
+series when selected on 2026-09-26; no current dependency requires support for
+an older interpreter. Both distributions include our license, third-party
+notices, and the lookup data's original license.
 
 Request one identified LETools planner build with
 `uv run --locked arpg-import https://www.lastepochtools.com/planner/<id>`.
